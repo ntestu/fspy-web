@@ -69,7 +69,7 @@ const eslintConfig = config(
           caughtErrors: 'all',
           caughtErrorsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
+          varsIgnorePattern: '^_|^React$',
           ignoreRestSiblings: true,
         },
       ],

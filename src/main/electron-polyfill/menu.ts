@@ -14,6 +14,8 @@ export type MenuItemConstructorOptions = {
 }
 
 export class Menu {
+  private static applicationMenu = new Menu([])
+
   readonly items: readonly MenuItem[]
   private readonly itemsById = new Map<string, MenuItem>()
 
@@ -34,6 +36,14 @@ export class Menu {
 
   static buildFromTemplate(template: MenuItemConstructorOptions[]): Menu {
     return new Menu(template.map(item => new MenuItem(item)))
+  }
+
+  static setApplicationMenu(menu: Menu): void {
+    Menu.applicationMenu = menu
+  }
+
+  static getApplicationMenu(): Menu {
+    return Menu.applicationMenu
   }
 
   getMenuItemById(id: string): MenuItem {
@@ -59,11 +69,13 @@ export class MenuItem {
     this.type = options.type
     this.label = options.label
     this.id = options.id
-    this.accelerator = options.accelerator ? {
-      control: options.accelerator.control ?? false,
-      shift: options.accelerator.shift ?? false,
-      key: options.accelerator.key,
-    } : undefined;
+    this.accelerator = options.accelerator
+      ? {
+          control: options.accelerator.control ?? false,
+          shift: options.accelerator.shift ?? false,
+          key: options.accelerator.key,
+        }
+      : undefined
     this.click = options.click
     this.submenu =
       options.submenu?.map(subOptions => new MenuItem(subOptions)) ?? []

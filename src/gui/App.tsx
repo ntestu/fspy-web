@@ -40,6 +40,7 @@ import store from './store/store'
 import SplashScreen from './components/splash-screen'
 import { Dispatch } from 'redux'
 import MenuBar from './components/menu/menu-bar'
+import { Buffer } from 'buffer'
 
 interface AppProps {
   uiState: UIState,

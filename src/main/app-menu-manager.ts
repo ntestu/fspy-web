@@ -1,4 +1,3 @@
-// TODO réimplémenter ça directement en réact
 /**
  * fSpy
  * Copyright (c) 2020 - Per Gantelius
@@ -23,7 +22,6 @@ export interface AppMenuCallbacks {
   onNewProject(): void
   onOpenProject(): void
   onSaveProject(): void
-  onSaveProjectAs(): void
   onOpenImage(): void
   onOpenExampleProject(): void
   onExportJSON(): void
@@ -64,15 +62,6 @@ export default class AppMenuManager {
       },
     }
 
-    let saveAsItem = {
-      label: 'Save as',
-      id: 'save-as',
-      accelerator: { control: true, shift: true, key: 'S' },
-      click: () => {
-        this.callbacks.onSaveProjectAs()
-      },
-    }
-
     let openExampleProjectItem = {
       label: 'Open example project',
       id: 'open-example-project',
@@ -98,7 +87,6 @@ export default class AppMenuManager {
       openImageItem,
       { type: 'separator' },
       saveItem,
-      saveAsItem,
       { type: 'separator' },
       {
         label: 'Export',

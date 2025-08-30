@@ -5,22 +5,19 @@ import {
   MenuItem,
   SubMenu,
 } from '@szhsin/react-menu'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from 'react'
 import packageJson from '../../../../package.json' with { type: 'json' }
-import AppMenuManager from '../../../main/app-menu-manager'
 import {
+  Menu as ElectronMenu,
+  MenuItem as ElectronMenuItem,
   MenuItemAccelerator,
-  MenuItem as MenuItemData,
 } from '../../../main/electron-polyfill/menu'
 import './menu-bar.css'
 
 export default function MenuBar() {
-  const appMenuManager = new AppMenuManager({} as any)
-
   return (
     <nav className="menu-bar">
-      {appMenuManager.menu.items.map((baseItem, index) => (
+      {ElectronMenu.getApplicationMenu().items.map((baseItem, index) => (
         <Menu
           key={baseItem.id ?? index}
           menuButton={<MenuButton>{baseItem.label}</MenuButton>}
@@ -42,7 +39,7 @@ export default function MenuBar() {
   )
 }
 
-function renderMenuItem(item: MenuItemData, index: number) {
+function renderMenuItem(item: ElectronMenuItem, index: number) {
   const id = item.id ?? index
 
   if (item.type === 'separator') {
@@ -67,7 +64,7 @@ function renderMenuItem(item: MenuItemData, index: number) {
   }
 }
 
-function renderMenuItemLabel(item: MenuItemData) {
+function renderMenuItemLabel(item: ElectronMenuItem) {
   let indicator: string | undefined
 
   if (hasSubMenu(item)) {
@@ -87,7 +84,7 @@ function renderMenuItemLabel(item: MenuItemData) {
   }
 }
 
-function hasSubMenu(item: MenuItemData) {
+function hasSubMenu(item: ElectronMenuItem) {
   return item.submenu.length > 0
 }
 

@@ -16,19 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: move everything somewhere else
-import { dialog } from 'electron'
 import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, SaveProjectAsMessage, NewProjectMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from './ipc-messages'
 
 import { SpecifyProjectPathMessage, SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
-import { basename } from 'path'
 import AppMenuManager from './app-menu-manager'
 import ProjectFile from '../gui/io/project-file'
-import { openSync, writeSync, closeSync } from 'fs'
+// TODO
+// import { openSync, writeSync, closeSync } from 'fs'
 import { BrowserWindow } from './electron-polyfill/browser-window'
+import { dialog } from './electron-polyfill/dialog'
 import { ipcMain } from './electron-polyfill/ipc'
-
-let mainWindow: BrowserWindow | null = null
+import { Menu } from './electron-polyfill/menu'
 
 export interface DocumentState {
   hasUnsavedChanges: boolean
@@ -38,7 +36,7 @@ export interface DocumentState {
 
 let documentState: DocumentState | null = null
 
-let initialOpenMessage: OpenProjectMessage | null = null
+createWindow()
 
 function openProject(path: string, window: BrowserWindow) {
   window.webContents.send(
@@ -65,39 +63,20 @@ function createWindow() {
       onOpenProject: () => {
         showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
           if (!didCancel) {
-            if (mainWindow) {
-              dialog.showOpenDialog(
-                mainWindow,
-                {
-                  filters: [
-                    { name: 'fSpy project files', extensions: ['fspy'] }
-                  ],
-                  properties: ['openFile']
-                }
-              ).then((result) => {
-                if (!result.canceled) {
-                  openProject(result.filePaths[0], window)
-                }
-              }).catch((_) => {
-                //
-              })
-            } else {
-              dialog.showOpenDialog(
-                {
-                  filters: [
-                    { name: 'fSpy project files', extensions: ['fspy'] }
-                  ],
-                  properties: ['openFile']
-                }
-              ).then((result) => {
-                if (!result.canceled) {
-                  initialOpenMessage = new OpenProjectMessage(result.filePaths[0], false)
-                  createWindow()
-                }
-              }).catch((_) => {
-                //
-              })
-            }
+            dialog.showOpenDialog(
+              {
+                filters: [
+                  { name: 'fSpy project files', extensions: ['fspy'] }
+                ],
+                properties: ['openFile']
+              }
+            ).then((result) => {
+              if (!result.canceled) {
+                openProject(result.filePaths[0], window)
+              }
+            }).catch((error: unknown) => {
+              console.error('Failed to open project', error)
+            })
           }
         })
       },
@@ -107,24 +86,8 @@ function createWindow() {
           new SaveProjectMessage()
         )
       },
-      onSaveProjectAs: () => {
-        dialog.showSaveDialog(
-          window,
-          {}
-        ).then((result) => {
-          if (!result.canceled && result.filePath !== undefined) {
-            window.webContents.send(
-              SaveProjectAsMessage.type,
-              new SaveProjectAsMessage(result.filePath)
-            )
-          }
-        }).catch((_) => {
-          //
-        })
-      },
       onOpenImage: () => {
         dialog.showOpenDialog(
-          window,
           {
             properties: ['openFile']
           }
@@ -135,23 +98,18 @@ function createWindow() {
               new OpenImageMessage(result.filePaths[0])
             )
           }
-        }).catch((_) => {
-          //
+        }).catch((error: unknown) => {
+          console.error('Failed to open image', error)
         })
       },
       onOpenExampleProject: () => {
         showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
           if (!didCancel) {
             let projectPath = ProjectFile.exampleProjectPath
-            if (mainWindow) {
-              window.webContents.send(
-                OpenProjectMessage.type,
-                new OpenProjectMessage(projectPath, true)
-              )
-            } else {
-              initialOpenMessage = new OpenProjectMessage(projectPath, true)
-              createWindow()
-            }
+            window.webContents.send(
+              OpenProjectMessage.type,
+              new OpenProjectMessage(projectPath, true)
+            )
           }
         })
       },
@@ -192,33 +150,27 @@ function createWindow() {
       filePath: null,
       isExampleProject: false
     }
-
-    if (initialOpenMessage) {
-      window.webContents.send(
-        OpenProjectMessage.type,
-        new OpenProjectMessage(initialOpenMessage.filePath, false)
-      )
-    }
   })
 
   Menu.setApplicationMenu(appMenuManager.menu)
   appMenuManager.setExitFullScreenItemEnabled(false)
 
-  window.on('close', (event: Event) => {
+  window.on('close', () => {
     showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
       if (didCancel) {
-        event.preventDefault()
+        // TODO
+        // event.preventDefault()
       }
     })
   })
 
-  window.on('enter-full-screen', (_: Event) => {
+  window.on('enter-full-screen', () => {
     appMenuManager.setEnterFullScreenItemEnabled(false)
     appMenuManager.setExitFullScreenItemEnabled(true)
     window.setMenuBarVisibility(false)
   })
 
-  window.on('leave-full-screen', (_: Event) => {
+  window.on('leave-full-screen', () => {
     window.webContents.send(
       SetSidePanelVisibilityMessage.type,
       new SetSidePanelVisibilityMessage(true)
@@ -229,9 +181,7 @@ function createWindow() {
   })
 
   ipcMain.on(SpecifyProjectPathMessage.type, (_: any, __: SpecifyProjectPathMessage) => {
-    // TODO: DRY
     dialog.showSaveDialog(
-      window,
       {}
     ).then((result) => {
       if (!result.canceled && result.filePath) {
@@ -240,24 +190,23 @@ function createWindow() {
           new SaveProjectAsMessage(result.filePath)
         )
       }
-    }).catch((_) => {
-      //
+    }).catch((error: unknown) => {
+      console.error('Failed to save project:', error)
     })
   })
 
   ipcMain.on(SpecifyExportPathMessage.type, (_: any, message: SpecifyExportPathMessage) => {
-    // TODO: DRY
     dialog.showSaveDialog(
-      window,
       {}
     ).then((result) => {
       if (!result.canceled && result.filePath) {
-        let file = openSync(result.filePath, 'w')
-        writeSync(file, message.data)
-        closeSync(file)
+        // TODO
+        // let file = openSync(result.filePath, 'w')
+        // writeSync(file, message.data)
+        // closeSync(file)
       }
-    }).catch((_) => {
-      //
+    }).catch((error: unknown) => {
+      console.error('Failed to export data:', error)
     })
   })
 
@@ -270,22 +219,30 @@ function createWindow() {
   })
 
   function refreshTitle() {
-    let title = 'Untitled'
+    document.title = generateTitle()
+  }
 
-    if (documentState !== null) {
+  function generateTitle() {
+    if (documentState === null) {
+      return 'fSpy'
+    } else {
+      let title: string
+
       if (documentState.isExampleProject) {
         title = 'Example project'
       } else if (documentState.filePath !== null) {
         title = basename(documentState.filePath)
+      } else {
+        title = 'Untitled'
       }
 
       if (documentState.hasUnsavedChanges) {
         title += ' (modified)'
       }
-    }
 
-    title += ' - fSpy'
-    document.title = title
+      title += ' - fSpy'
+      return title
+    }
   }
 
   ipcMain.on(SetDocumentStateMessage.type, (_: any, message: SetDocumentStateMessage) => {
@@ -313,19 +270,13 @@ function showDiscardChangesDialogIfNeeded(callback: (didCancel: boolean) => void
   }
 
   if (documentState.hasUnsavedChanges) {
-    // TODO
-    callback(false)
-    // let result = dialog.showMessageBoxSync(
-    //   window!,
-    //   {
-    //     type: 'question',
-    //     buttons: ['Discard', 'Cancel'],
-    //     title: 'Proceed?',
-    //     message: 'Do you want to discard unsaved changes?'
-    //   }
-    // )
-    // callback(result != 0)
+    let result = dialog.showMessageBoxSync('Do you want to discard unsaved changes?')
+    callback(result != 0)
   } else {
     callback(false)
   }
+}
+
+function basename(path: string) {
+  return path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
 }

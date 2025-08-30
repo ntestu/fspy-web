@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from 'react'
 import { resourceURL } from '../io/util'
 import { Palette } from '../style/palette'

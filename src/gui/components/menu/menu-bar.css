@@ -52,6 +52,10 @@
   background-color: var(--menu-list-item-hover);
 }
 
+.szh-menu__item--disabled {
+  opacity: 0.5;
+}
+
 .menu-indicator {
   flex-grow: 1;
   margin-inline-start: 16px;
