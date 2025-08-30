@@ -16,14 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { join } from 'path'
+// TODO
+// import { join } from 'path'
+import { Buffer } from 'buffer'
+import syncFetch from 'sync-fetch'
 
 export function loadImage(
   imageBuffer: Buffer,
   onLoad: (width: number, height: number, url: string) => void,
   onError: () => void
 ) {
-  let blob = new Blob([imageBuffer])
+  let blob = new Blob([imageBuffer as any]) // TODO remove cast
   let url = URL.createObjectURL(blob)
   let image = new Image()
   image.src = url
@@ -36,25 +39,17 @@ export function loadImage(
 }
 
 export function resourceURL(fileName: string): string {
-  if (process.resourcesPath != null) {
-    if (process.env.DEV) {
-      return join(`file://${process.cwd()}`, 'assets/electron', fileName)
-    } else {
-      return join(process.resourcesPath, fileName)
-    }
-  }
-
-  return ''
+  // Leftover function from the original repo kept to minimize changes
+  return resourcePath(fileName)
 }
 
 export function resourcePath(fileName: string): string {
-  if (process.resourcesPath != null) {
-    if (process.env.DEV) {
-      return join(process.cwd(), 'assets/electron', fileName)
-    } else {
-      return join(process.resourcesPath, fileName)
-    }
-  }
+  // Leftover function from the original repo kept to minimize changes
+  // From https://vite.dev/guide/assets.html#the-public-directory: "Note that you should always reference public assets using root absolute path - for example, public/icon.png should be referenced in source code as /icon.png."
+  return '/' + fileName
+}
 
-  return ''
+export function fetchBytesSync(url: string): Buffer {
+  // TODO: use async fetch instead
+  return Buffer.from(syncFetch(url).arrayBuffer())
 }

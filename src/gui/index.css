@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+:root {
+  --image-panel-background: #252B2E;
+  --image-panel-button-background: #374146;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -48,8 +53,14 @@ textarea {
 
 #app-container {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   overflow: hidden;
+}
+
+#content-container {
+  display: flex;
+  flex-grow: 1;
 }
 
 #left-panel {
@@ -60,7 +71,7 @@ textarea {
 #panel-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
 }
 
 #panel-top-container {
@@ -70,7 +81,7 @@ textarea {
 
 #center-panel {
   color: #898E91;
-  background-color: #252B2E;
+  background-color: var(--image-panel-background);
   flex-grow: 1;
   position: relative;
   overflow: hidden;
@@ -83,7 +94,7 @@ textarea {
 
 #image-panel {
   width: 100%;
-  height: 100vh;
+  height: 100%;
 }
 
 .side-panel {

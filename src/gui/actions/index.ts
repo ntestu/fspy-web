@@ -27,6 +27,7 @@ import { SolverResult } from '../solver/solver-result'
 import SavedState from '../io/saved-state'
 import { ImageState } from '../types/image-state'
 import { OrientationFormat, PrincipalPointFormat, FieldOfViewFormat } from '../types/result-display-settings'
+import type { Buffer } from 'buffer'
 
 export enum ActionTypes {
   // IO actions
@@ -153,6 +154,7 @@ export function setProjectHasUnsavedChanges(): SetProjectHasUnsavedChanged {
 }
 
 //
+// TODO change to SetProjectFileName
 export interface SetProjectFilePath {
   type: ActionTypes.SET_PROJECT_FILE_PATH
   projectFilePath: string

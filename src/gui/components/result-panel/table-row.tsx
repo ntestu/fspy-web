@@ -18,7 +18,7 @@
 
 import * as React from 'react'
 import Button from '../common/button'
-import { clipboard } from 'electron'
+import { clipboard } from '../../../main/electron-polyfill/clipboard'
 
 interface TableRowProps {
   title: string
@@ -43,7 +43,9 @@ export default class TableRow extends React.PureComponent<TableRowProps> {
         <span style={{ fontFamily: 'monospace' }}> {this.valueDisplayString}</span>
         <span style={{ flexGrow: 1, textAlign: 'right' }}>
           <Button width='50px' title='Copy' onClick={ () => {
-            clipboard.writeText(this.valueClipboardString)
+            clipboard
+              .writeText(this.valueClipboardString)
+              .catch((error: unknown) => console.error('Failed to copy text to clipboard:', error))
           } }/>
         </span>
       </div>

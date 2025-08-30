@@ -16,23 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron'
+// TODO: move everything somewhere else
+import { dialog } from 'electron'
 import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, SaveProjectAsMessage, NewProjectMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from './ipc-messages'
-const path = require('path')
-const url = require('url')
 
-import windowStateKeeper from 'electron-window-state'
 import { SpecifyProjectPathMessage, SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
-import { basename, join } from 'path'
+import { basename } from 'path'
 import AppMenuManager from './app-menu-manager'
 import ProjectFile from '../gui/io/project-file'
-import { Palette } from '../gui/style/palette'
 import { openSync, writeSync, closeSync } from 'fs'
-import { CLI } from '../cli/cli'
+import { BrowserWindow } from './electron-polyfill/browser-window'
+import { ipcMain } from './electron-polyfill/ipc'
 
-app.allowRendererProcessReuse = true
-
-let mainWindow: Electron.BrowserWindow | null = null
+let mainWindow: BrowserWindow | null = null
 
 export interface DocumentState {
   hasUnsavedChanges: boolean
@@ -43,29 +39,8 @@ export interface DocumentState {
 let documentState: DocumentState | null = null
 
 let initialOpenMessage: OpenProjectMessage | null = null
-let windowHasAppeared = false
-
-// macOS only
-app.on('open-file', (event: Event, filePath: string) => {
-  if (mainWindow === null) {
-    initialOpenMessage = new OpenProjectMessage(filePath, false)
-    if (windowHasAppeared) {
-      // The main window has appeared at least once but there is
-      // currently no window. Create one
-      createWindow()
-    }
-  } else {
-    showDiscardChangesDialogIfNeeded(mainWindow, (didCancel: boolean) => {
-      event.preventDefault()
-      if (!didCancel) {
-        openProject(filePath, mainWindow!)
-      }
-    })
-  }
-})
 
 function openProject(path: string, window: BrowserWindow) {
-  app.addRecentDocument(path)
   window.webContents.send(
     OpenProjectMessage.type,
     new OpenProjectMessage(path, false)
@@ -73,62 +48,22 @@ function openProject(path: string, window: BrowserWindow) {
 }
 
 function createWindow() {
-  const minWidth = 800
-  const minHeight = 768
-  let mainWindowState = windowStateKeeper({
-    defaultWidth: minWidth,
-    defaultHeight: minHeight
-  })
-
-  let windowIconPath: string | undefined
-  if (process.resourcesPath) {
-    if (process.platform == 'darwin') {
-      //
-    } else if (process.platform == 'win32') {
-      windowIconPath = join(process.resourcesPath, 'icon.ico')
-    } else {
-      windowIconPath = join(process.resourcesPath, 'icon.png')
-    }
-  }
-
-  let window = new BrowserWindow({
-    x: mainWindowState.x,
-    y: mainWindowState.y,
-    width: mainWindowState.width,
-    height: mainWindowState.height,
-    minWidth: minWidth,
-    minHeight: minHeight,
-    show: false,
-    icon: windowIconPath,
-    backgroundColor: Palette.imagePanelBackgroundColor,
-    webPreferences: {
-      // Allow loading local files in dev mode
-      webSecurity: process.env.DEV === undefined,
-      nodeIntegration: true
-    }
-  })
-
-  mainWindowState.manage(window)
-  mainWindow = window
+  let window = new BrowserWindow();
 
   let appMenuManager = new AppMenuManager(
     {
       onNewProject: () => {
-        if (mainWindow) {
-          showDiscardChangesDialogIfNeeded(mainWindow, (didCancel: boolean) => {
-            if (!didCancel) {
-              window.webContents.send(
-                NewProjectMessage.type,
-                new NewProjectMessage()
-              )
-            }
-          })
-        } else {
-          createWindow()
-        }
+        showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
+          if (!didCancel) {
+            window.webContents.send(
+              NewProjectMessage.type,
+              new NewProjectMessage()
+            )
+          }
+        })
       },
       onOpenProject: () => {
-        showDiscardChangesDialogIfNeeded(mainWindow, (didCancel: boolean) => {
+        showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
           if (!didCancel) {
             if (mainWindow) {
               dialog.showOpenDialog(
@@ -205,7 +140,7 @@ function createWindow() {
         })
       },
       onOpenExampleProject: () => {
-        showDiscardChangesDialogIfNeeded(mainWindow, (didCancel: boolean) => {
+        showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
           if (!didCancel) {
             let projectPath = ProjectFile.exampleProjectPath
             if (mainWindow) {
@@ -232,9 +167,6 @@ function createWindow() {
           new ExportMessage(ExportType.ProjectImage)
         )
       },
-      onQuit: () => {
-        app.quit()
-      },
       onEnterFullScreenMode: () => {
         window.webContents.send(
           SetSidePanelVisibilityMessage.type,
@@ -252,22 +184,8 @@ function createWindow() {
     }
   )
 
-  // Prevent following links, e.g when they are dropped
-  // on the app window
-  window.webContents.on('will-navigate', ev => {
-    if (process.env.DEV) {
-      // Allow this event in dev builds, since auto reload
-      // relies on it
-    } else {
-      ev.preventDefault()
-    }
-  })
-
   window.on('ready-to-show', () => {
-    refreshTitle(window)
-    window.show()
-    window.focus()
-    windowHasAppeared = true
+    refreshTitle()
 
     documentState = {
       hasUnsavedChanges: false,
@@ -280,83 +198,16 @@ function createWindow() {
         OpenProjectMessage.type,
         new OpenProjectMessage(initialOpenMessage.filePath, false)
       )
-    } else {
-      // Check if an image or project path was passed as an argument
-      const argCount = process.argv.length
-      const openCommand = process.argv[argCount - 2]
-      const filePath = process.argv[argCount - 1]
-      if (openCommand == 'open' && filePath) {
-        try {
-          // Make sure the file can be opened before proceeding
-          const fd = openSync(filePath, 'r')
-          closeSync(fd)
-
-          if (ProjectFile.isProjectFile(filePath)) {
-            window.webContents.send(
-              OpenProjectMessage.type,
-              new OpenProjectMessage(filePath, false)
-            )
-          } else {
-            window.webContents.send(
-              OpenImageMessage.type,
-              new OpenImageMessage(filePath)
-            )
-          }
-        } catch (error) {
-          console.log(error)
-          console.log('process.argv:')
-          console.log(process.argv)
-
-          const errorMessage = 'Failed to open \'' + filePath + '\'. ' + error
-          dialog.showMessageBoxSync(window, {
-            message: errorMessage
-          })
-        }
-      }
     }
-
-    if (process.env.DEV) {
-      // show dev tools
-      window.webContents.openDevTools({ mode: 'bottom' })
-    }
-  })
-
-  const startUrl = url.format({
-    pathname: path.join(__dirname, '../build/index.html'),
-    protocol: 'file:',
-    slashes: true
-  })
-
-  const devUrl = 'http://localhost:8080'
-
-  window.loadURL(
-    process.env.DEV ? devUrl : startUrl
-  ).then((_) => {
-    //
-  }).catch((_) => {
-    //
   })
 
   Menu.setApplicationMenu(appMenuManager.menu)
   appMenuManager.setExitFullScreenItemEnabled(false)
 
   window.on('close', (event: Event) => {
-    showDiscardChangesDialogIfNeeded(window, (didCancel: boolean) => {
+    showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
       if (didCancel) {
         event.preventDefault()
-      } else {
-        ipcMain.removeAllListeners(SetDocumentStateMessage.type)
-        ipcMain.removeAllListeners(SpecifyProjectPathMessage.type)
-        ipcMain.removeAllListeners(SpecifyExportPathMessage.type)
-        ipcMain.removeAllListeners(OpenDroppedProjectMessage.type)
-        appMenuManager.setOpenImageItemEnabled(false)
-        appMenuManager.setSaveAsItemEnabled(false)
-        appMenuManager.setSaveItemEnabled(false)
-        appMenuManager.setEnterFullScreenItemEnabled(false)
-        appMenuManager.setExitFullScreenItemEnabled(false)
-        mainWindow = null
-        documentState = null
-        initialOpenMessage = null
       }
     })
   })
@@ -411,14 +262,14 @@ function createWindow() {
   })
 
   ipcMain.on(OpenDroppedProjectMessage.type, (_: any, message: OpenDroppedProjectMessage) => {
-    showDiscardChangesDialogIfNeeded(window, (didCancel: boolean) => {
+    showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
       if (!didCancel) {
         openProject(message.filePath, window)
       }
     })
   })
 
-  function refreshTitle(window: BrowserWindow) {
+  function refreshTitle() {
     let title = 'Untitled'
 
     if (documentState !== null) {
@@ -429,27 +280,12 @@ function createWindow() {
       }
 
       if (documentState.hasUnsavedChanges) {
-        if (process.platform !== 'darwin') {
-          title += ' (modified)'
-        } else {
-          // using window.setDocumentEdited on mac
-        }
+        title += ' (modified)'
       }
-
-      if (documentState.filePath) {
-        window.setRepresentedFilename(documentState.filePath)
-      } else {
-        window.setRepresentedFilename('')
-      }
-
-      window.setDocumentEdited(documentState.hasUnsavedChanges)
     }
 
-    if (process.platform !== 'darwin') {
-      title += ' - fSpy'
-    }
-
-    window.setTitle(title)
+    title += ' - fSpy'
+    document.title = title
   }
 
   ipcMain.on(SetDocumentStateMessage.type, (_: any, message: SetDocumentStateMessage) => {
@@ -466,75 +302,30 @@ function createWindow() {
         appMenuManager.setSaveItemEnabled(!message.isExampleProject)
       }
     }
-    refreshTitle(window)
+    refreshTitle()
   })
 }
 
-function showDiscardChangesDialogIfNeeded(
-  window: BrowserWindow | null,
-  callback: (didCancel: boolean) => void
-) {
+function showDiscardChangesDialogIfNeeded(callback: (didCancel: boolean) => void) {
   if (documentState === null) {
     callback(false)
     return
   }
 
-  if (window === null) {
-    callback(false)
-    return
-  }
-
   if (documentState.hasUnsavedChanges) {
-    let result = dialog.showMessageBoxSync(
-      window!,
-      {
-        type: 'question',
-        buttons: ['Discard', 'Cancel'],
-        title: 'Proceed?',
-        message: 'Do you want to discard unsaved changes?'
-      }
-    )
-    callback(result != 0)
+    // TODO
+    callback(false)
+    // let result = dialog.showMessageBoxSync(
+    //   window!,
+    //   {
+    //     type: 'question',
+    //     buttons: ['Discard', 'Cancel'],
+    //     title: 'Proceed?',
+    //     message: 'Do you want to discard unsaved changes?'
+    //   }
+    // )
+    // callback(result != 0)
   } else {
     callback(false)
   }
 }
-
-app.on('ready', () => {
-  // Assume we're in CLI mode if any argument starts
-  // with '-' or equals 'help'
-  let isCli = false
-  const args = process.argv
-  for (const arg of args) {
-    if (['-w', '-h', '-s', '-o', '-h', '--help', 'help'].indexOf(arg) >= 0) {
-      isCli = true
-      break
-    }
-  }
-
-  if (isCli) {
-    // We're in CLI mode. Run the CLI and exit
-    CLI.run(process.argv)
-    process.exit()
-  } else {
-    // We're in GUI mode.
-    createWindow()
-  }
-})
-
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
-    createWindow()
-  }
-})

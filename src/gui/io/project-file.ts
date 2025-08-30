@@ -16,17 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { openSync, writeSync, closeSync, readFileSync, readSync } from 'fs'
+// TODO
+// import { openSync, writeSync, closeSync, readFileSync, readSync } from 'fs'
 import store from '../store/store'
 import { StoreState } from '../types/store-state'
 import SavedState from './saved-state'
 import { AppAction, loadState, setProjectFilePath } from '../actions'
 import { Dispatch } from 'redux'
-import { loadImage, resourcePath } from './util'
-import { remote } from 'electron'
+import { fetchBytesSync, loadImage, resourcePath } from './util'
+import { remote } from '../../main/electron-polyfill/remote'
 import { defaultResultDisplaySettings } from '../defaults/result-display-settings'
 import { cameraPresets } from '../solver/camera-presets'
 import { ReferenceDistanceUnit } from '../types/calibration-settings'
+import { Buffer } from 'buffer'
 
 export default class ProjectFile {
   static readonly EXAMPLE_PROJECT_FILENAME = 'example.fspy'
@@ -77,38 +79,28 @@ export default class ProjectFile {
     headerBuffer.writeUInt32LE(stateBuffer.length, 8)
     headerBuffer.writeUInt32LE(imageData ? imageData.length : 0, 12)
 
-    let file = openSync(path, 'w')
-    writeSync(file, headerBuffer)
-    writeSync(file, stateBuffer)
-    if (imageData) {
-      writeSync(file, imageData)
-    }
-    closeSync(file)
+    // TODO
+    // let file = openSync(path, 'w')
+    // writeSync(file, headerBuffer)
+    // writeSync(file, stateBuffer)
+    // if (imageData) {
+    //   writeSync(file, imageData)
+    // }
+    // closeSync(file)
     dispatch(setProjectFilePath(path))
   }
 
   static loadExample(dispatch: Dispatch<AppAction>) {
-    this.load(this.exampleProjectPath, dispatch, true)
+    this.load(this.exampleProjectPath, fetchBytesSync(this.exampleProjectPath), dispatch, true)
   }
 
-  static load(path: string, dispatch: Dispatch<AppAction>, isExampleProject: boolean) {
-    if (!this.isProjectFile(path)) {
+  static load(path: string, buffer: Buffer, dispatch: Dispatch<AppAction>, isExampleProject: boolean) {
+    if (!this.isProjectFile(buffer)) {
       remote.dialog.showErrorBox(// TODO: proper modal
         'Failed to load project',
         'This does not appear to be a valid project file'
       )
     } else {
-      let buffer = new Buffer(0)
-      try {
-        buffer = readFileSync(path)
-      } catch {
-        remote.dialog.showErrorBox(// TODO: proper modal
-          'Failed to load image data',
-          'Could not load the image data contained in the project file'
-        )
-        return
-      }
-
       let headerSize = 16
       let projectFileVersion = buffer.readUInt32LE(4)
       if (projectFileVersion != this.PROJECT_FILE_VERSION) {
@@ -211,25 +203,13 @@ export default class ProjectFile {
     }
   }
 
-  static isProjectFile(path: string): boolean {
-    let file = 0
-    try {
-      file = openSync(path, 'r')
-    } catch {
+  static isProjectFile(buffer: Buffer): boolean {
+    if (buffer.length < this.PROJECT_FILE_ID.length) {
       return false
     }
 
-    let buffer = new Buffer(4)
-    readSync(file, buffer, 0, 4, 0)
-    closeSync(file)
-    let fileId = [
-      buffer.readUInt8(0),
-      buffer.readUInt8(1),
-      buffer.readUInt8(2),
-      buffer.readUInt8(3)
-    ]
-    for (let i = 0; i < fileId.length; i++) {
-      if (fileId[i] != this.PROJECT_FILE_ID.charCodeAt(i)) {
+    for (let i = 0; i < this.PROJECT_FILE_ID.length; i++) {
+      if (buffer.readUint8(i) != this.PROJECT_FILE_ID.charCodeAt(i)) {
         return false
       }
     }

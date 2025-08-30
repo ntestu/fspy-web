@@ -23,20 +23,23 @@ import SettingsContainer from './containers/settings-container'
 
 import { StoreState } from './types/store-state'
 import { connect } from 'react-redux'
+// TODO
 import { AppAction, setImage, loadDefaultState, setSidePanelVisibility } from './actions'
 import { GlobalSettings } from './types/global-settings'
 import { UIState } from './types/ui-state'
 import { ImageState } from './types/image-state'
 import { SolverResult } from './solver/solver-result'
-import { ipcRenderer, remote } from 'electron'
+import { ipcRenderer } from '../main/electron-polyfill/ipc'
+// import { remote } from '../main/electron-polyfill/remote'
 import { NewProjectMessage, OpenProjectMessage, SaveProjectMessage, SaveProjectAsMessage, OpenImageMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from '../main/ipc-messages'
 import ProjectFile from './io/project-file'
-import { readFileSync } from 'fs'
+// import { readFileSync } from 'fs'
 import { SpecifyProjectPathMessage, OpenDroppedProjectMessage, SpecifyExportPathMessage } from './ipc-messages'
-import { loadImage } from './io/util'
+// import { loadImage } from './io/util'
 import store from './store/store'
 import SplashScreen from './components/splash-screen'
 import { Dispatch } from 'redux'
+import MenuBar from './components/menu/menu-bar'
 
 interface AppProps {
   uiState: UIState,
@@ -83,14 +86,15 @@ class App extends React.PureComponent<AppProps> {
       if (ev.dataTransfer != null) {
         let firstFile = ev.dataTransfer.files[0]
         if (firstFile) {
-          let filePath = firstFile.path
-          let isProjectFile = ProjectFile.isProjectFile(filePath)
-          if (isProjectFile) {
-            this.props.onProjectFileDropped(filePath)
-          } else {
-            // try to open the file as an image
-            this.props.onImageFileDropped(filePath)
-          }
+          // TODO
+          // let filePath = firstFile.path
+          // let isProjectFile = ProjectFile.isProjectFile(filePath)
+          // if (isProjectFile) {
+          //   this.props.onProjectFileDropped(filePath)
+          // } else {
+          //   // try to open the file as an image
+          //   this.props.onImageFileDropped(filePath)
+          // }
         }
         ev.preventDefault()
         return false
@@ -103,10 +107,16 @@ class App extends React.PureComponent<AppProps> {
     const hasImage = this.props.image.data !== null
     return (
       <div id='app-container'>
-        <SettingsContainer isVisible={this.props.uiState.sidePanelsAreVisible} />
-        <ControlPointsContainer />
-        <ResultContainer isVisible={this.props.uiState.sidePanelsAreVisible} />
-        { !hasImage ? (<SplashScreen onClickedLoadExampleProject={this.props.onOpenExampleProjectPressed} />) : null }
+        <MenuBar />
+        <div id='content-container'>
+          {hasImage
+            ? <>
+              <SettingsContainer isVisible={this.props.uiState.sidePanelsAreVisible} />
+              <ControlPointsContainer />
+              <ResultContainer isVisible={this.props.uiState.sidePanelsAreVisible} />
+            </>
+            : <SplashScreen onClickedLoadExampleProject={this.props.onOpenExampleProjectPressed} />}
+        </div>
       </div>
     )
   }
@@ -158,20 +168,21 @@ export function mapStateToProps(state: StoreState) {
 export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
   return {
     onImageFileDropped: (imagePath: string) => {
-      let imageBuffer = readFileSync(imagePath)
-      // TODO: good to do async loading here?
-      loadImage(
-        imageBuffer,
-        (width: number, height: number, url: string) => {
-          dispatch(setImage(url, imageBuffer, width, height))
-        },
-        () => {
-          remote.dialog.showErrorBox(
-            'Failed to load image data',
-            'Could not load the image data. Is this a valid image file?'
-          )
-        }
-      )
+      // TODO
+      // let imageBuffer = readFileSync(imagePath)
+      // // TODO: good to do async loading here?
+      // loadImage(
+      //   imageBuffer,
+      //   (width: number, height: number, url: string) => {
+      //     dispatch(setImage(url, imageBuffer, width, height))
+      //   },
+      //   () => {
+      //     remote.dialog.showErrorBox(
+      //       'Failed to load image data',
+      //       'Could not load the image data. Is this a valid image file?'
+      //     )
+      //   }
+      // )
     },
     onProjectFileDropped: (projectPath: string) => {
       ipcRenderer.send(
@@ -186,22 +197,24 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
       dispatch(loadDefaultState())
     },
     onOpenProjectIPCMessage: (filePath: string, isExampleProject: boolean) => {
-      ProjectFile.load(filePath, dispatch, isExampleProject)
+      // TODO
+      ProjectFile.load(filePath, Buffer.alloc(0), dispatch, isExampleProject)
     },
     onSaveProjectAsIPCMessage: (filePath: string) => {
       ProjectFile.save(filePath, dispatch)
     },
     onOpenImageIPCMessage: (imagePath: string) => {
-      let imageBuffer = readFileSync(imagePath)
-      loadImage(
-        imageBuffer,
-        (width: number, height: number, url: string) => {
-          dispatch(setImage(url, imageBuffer, width, height))
-        },
-        () => {
-          alert('Failed to load image')
-        }
-      )
+      // TODO
+      // let imageBuffer = readFileSync(imagePath)
+      // loadImage(
+      //   imageBuffer,
+      //   (width: number, height: number, url: string) => {
+      //     dispatch(setImage(url, imageBuffer, width, height))
+      //   },
+      //   () => {
+      //     alert('Failed to load image')
+      //   }
+      // )
     },
     onOpenExampleProjectIPCMessage: () => {
       ProjectFile.loadExample(dispatch)

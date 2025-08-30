@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from 'react'
 import { resourceURL } from '../io/util'
 import { Palette } from '../style/palette'
-import { remote } from 'electron'
 
 interface SplashScreenProps {
   onClickedLoadExampleProject(): void
@@ -27,9 +27,8 @@ interface SplashScreenProps {
 
 export default function SplashScreen(props: SplashScreenProps) {
   return (
-    <div style={{ backgroundColor: Palette.imagePanelBackgroundColor, width: '100vw', height: '100vh', position: 'absolute' }}>
-      <div style={{ position: 'absolute', right: '0px', padding: '10px', color: 'white', opacity: 0.1 }}>{ remote.app.getVersion() }</div>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'center' }}>
+    <div style={{ backgroundColor: Palette.imagePanelBackgroundColor, flexGrow: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', alignSelf: 'center' }}>
           <img
             style={{ width: '100px', marginTop: '100px', marginBottom: '30px', height: '100px' }}
@@ -47,7 +46,7 @@ export default function SplashScreen(props: SplashScreenProps) {
               border: 'none',
               boxShadow: 'none',
               outline: 'none',
-              backgroundColor: '#374146'
+              backgroundColor: 'var(--image-panel-button-background)'
             }}
             onClick={props.onClickedLoadExampleProject}>
             Load example project

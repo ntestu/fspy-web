@@ -29,7 +29,7 @@ export class Palette {
   static readonly lightGray = 'Menu'
   static readonly gray = '#e1e1e1'
   static readonly black = 'WindowText'
-  static readonly imagePanelBackgroundColor = '#252B2E'
+  static readonly imagePanelBackgroundColor = 'var(--image-panel-background)'
   static readonly disabledTextColor = '#909090'
 
   // Color aliases

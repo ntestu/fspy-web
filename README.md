@@ -1,12 +1,10 @@
-## What is this?
+# fspy-web
 
-fSpy is an open source, cross platform app for still image camera matching. See [fspy.io](https://fspy.io) for more info. The source code is available under the GPL license.
+This is a fork of [fSpy](https://github.com/stuffmatic/fSpy) porting it to a web application so that it can be used directly from a browser.
+
+fSpy is an open source app for still image camera matching. See [fspy.io](https://fspy.io) for more info. The source code is available under the GPL license.
 
 ![fSpy screenshot](screenshot.jpg)
-
-## Backstory
-
-Once upon a time I wrote BLAM, a [Blender](https://blender.org) add-on for still image camera calibration that, despite its clunky UI, has gained some popularity in the Blender community. fSpy is an attempt to bring BLAM's functionality to a wider audience in the form of a stand alone app.
 
 ## Using the computed camera parameters in other applications
 
@@ -17,33 +15,21 @@ Interested in writing an importer for your favorite application? Then the [fSpy 
 
 ## Building and running
 
-The following instructions are for developers. If you just want to run the app, [download the latest executable for your platform](https://github.com/stuffmatic/fSpy/releases).
+<!-- TODO: url -->
+The following instructions are for developers. If you just want to use the app, head to the web application or [download the latest executable for your platform](https://github.com/stuffmatic/fSpy/releases).
 
-fSpy is written in [Typescript](https://www.typescriptlang.org) using [Electron](https://electronjs.org), [React](https://reactjs.org) and [Redux](https://redux.js.org). [Visual Studio Code](https://code.visualstudio.com) is recommended for a pleasant editing experience.
+fspy-web is written in [Typescript](https://www.typescriptlang.org) using [Vite](https://vite.dev), [React](https://reactjs.org) and [Redux](https://redux.js.org). [Visual Studio Code](https://code.visualstudio.com) is recommended for a pleasant editing experience.
 
-To install necessary dependencies, run
+Useful commands are:
+- `pnpm install`: install necessary dependencies
+- `pnpm start`: run the app in development mode
+- `pnpm build`: build the app for production
+- `pnpm preview`: locally preview the built production app
 
-```
-yarn
-```
-
-The `src` folder contains two subfolders `main` and `gui`, containing code for the [Electron main and renderer processes](https://electronjs.org/docs/tutorial/application-architecture) respectively.
-
-Here's how to run the app in development mode
-
-1. Run `yarn dev-server` in a separate terminal tab to start the dev server
-2. Run `yarn build-dev` to build both the main and GUI code. This build step is needed to generate main process code used to start up the app.
-3. Run `yarn electron-dev` in a separate terminal tab to start an Electron instance which uses the dev server to provide automatic reloading on GUI code changes.
-
-⚠️ The current build process is not ideal. For example, it lacks support for live reloading on main process code changes. Changes to main process code require a manual rebuild, i.e steps 2-3, in order to show up in the app.
+Note that this fork aims to make as few changes as possible to files from the base repo in order to minimize potential merge conflicts.
+This comes at the cost of some parts of the code being less idiomatic, e.g. anything mentioning Electron despite the project not depending on Electron anymore.
 
 
-## Creating binaries for distribution
+## Notes
 
-To create executables for distribution, run
-
-```
-yarn dist
-```
-
-which invokes [Electron builder](https://github.com/electron-userland/electron-builder).
+This fork was created using `pnpx degit reduxjs/redux-templates/packages/vite-template-redux`.

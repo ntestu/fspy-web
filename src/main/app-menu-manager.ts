@@ -1,3 +1,4 @@
+// TODO réimplémenter ça directement en réact
 /**
  * fSpy
  * Copyright (c) 2020 - Per Gantelius
@@ -16,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { app, Menu } from 'electron'
+import { Menu, MenuItemConstructorOptions } from './electron-polyfill/menu'
 
 export interface AppMenuCallbacks {
   onNewProject(): void
@@ -25,7 +26,6 @@ export interface AppMenuCallbacks {
   onSaveProjectAs(): void
   onOpenImage(): void
   onOpenExampleProject(): void
-  onQuit(): void
   onExportJSON(): void
   onExportProjectImage(): void
   onEnterFullScreenMode(): void
@@ -39,38 +39,38 @@ export default class AppMenuManager {
   constructor(callbacks: AppMenuCallbacks) {
     this.callbacks = callbacks
 
-    let newItem = {
+    let newItem: MenuItemConstructorOptions = {
       label: 'New',
-      accelerator: 'CommandOrControl+N',
+      accelerator: { control: true, key: 'N' },
       click: () => {
         this.callbacks.onNewProject()
-      }
+      },
     }
 
-    let openItem = {
+    let openItem: MenuItemConstructorOptions = {
       label: 'Open',
-      accelerator: 'CommandOrControl+O',
+      accelerator: { control: true, key: 'O' },
       click: () => {
         this.callbacks.onOpenProject()
-      }
+      },
     }
 
     let saveItem = {
       label: 'Save',
       id: 'save',
-      accelerator: 'CommandOrControl+S',
+      accelerator: { control: true, key: 'S' },
       click: () => {
         this.callbacks.onSaveProject()
-      }
+      },
     }
 
     let saveAsItem = {
       label: 'Save as',
       id: 'save-as',
-      accelerator: 'CommandOrControl+Shift+S',
+      accelerator: { control: true, shift: true, key: 'S' },
       click: () => {
         this.callbacks.onSaveProjectAs()
-      }
+      },
     }
 
     let openExampleProjectItem = {
@@ -78,27 +78,19 @@ export default class AppMenuManager {
       id: 'open-example-project',
       click: () => {
         this.callbacks.onOpenExampleProject()
-      }
+      },
     }
 
     let openImageItem = {
       label: 'Open image',
       id: 'open-image',
-      accelerator: 'CommandOrControl+Shift+O',
+      accelerator: { control: true, shift: true, key: 'O' },
       click: () => {
         this.callbacks.onOpenImage()
-      }
+      },
     }
 
-    let quitMenuItem: Electron.MenuItemConstructorOptions = {
-      label: 'Quit',
-      accelerator: 'Command+Q',
-      click: () => {
-        this.callbacks.onQuit()
-      }
-    }
-
-    let fileMenuItems: Electron.MenuItemConstructorOptions[] = [
+    let fileMenuItems: MenuItemConstructorOptions[] = [
       newItem,
       openItem,
       { type: 'separator' },
@@ -115,38 +107,21 @@ export default class AppMenuManager {
             label: 'Camera parameters as JSON',
             click: () => {
               this.callbacks.onExportJSON()
-            }
+            },
           },
           {
             label: 'Project image',
             click: () => {
               this.callbacks.onExportProjectImage()
-            }
-          }
-        ]
-      }
+            },
+          },
+        ],
+      },
     ]
-
-    if (process.platform !== 'darwin') {
-      fileMenuItems.push({ type: 'separator' })
-      fileMenuItems.push(quitMenuItem)
-    } else {
-      let recentDocumentsSubmenu: Electron.MenuItemConstructorOptions = {
-        label: 'Open Recent',
-        role: 'recentDocuments',
-        submenu: [
-          {
-            label: 'Clear Recent',
-            role: 'clearRecentDocuments'
-          }
-        ]
-      }
-      fileMenuItems.splice(2, 0, recentDocumentsSubmenu)
-    }
 
     let fileMenu = {
       label: 'File',
-      submenu: fileMenuItems
+      submenu: fileMenuItems,
     }
 
     let menus = [fileMenu]
@@ -156,31 +131,22 @@ export default class AppMenuManager {
         {
           label: 'Enter full screen mode',
           id: 'enter-full-screen',
-          accelerator: 'Command+F',
+          accelerator: { control: true, key: 'F' },
           click: () => {
             this.callbacks.onEnterFullScreenMode()
-          }
+          },
         },
         {
           label: 'Exit full screen mode',
           id: 'exit-full-screen',
-          accelerator: 'Escape',
+          accelerator: { key: 'Escape' },
           click: () => {
             this.callbacks.onExitFullScreenMode()
-          }
-        }
-      ]
+          },
+        },
+      ],
     }
     menus.push(viewMenu)
-
-    if (process.platform === 'darwin') {
-      menus.unshift({
-        label: app.name,
-        submenu: [
-          quitMenuItem
-        ]
-      })
-    }
 
     this.menu = Menu.buildFromTemplate(menus)
   }

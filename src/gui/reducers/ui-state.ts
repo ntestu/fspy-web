@@ -19,7 +19,7 @@
 import { ActionTypes, AppAction } from '../actions'
 import { UIState } from '../types/ui-state'
 import { defaultUIState } from '../defaults/ui-state'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '../../main/electron-polyfill/ipc'
 import { SetDocumentStateMessage } from '../ipc-messages'
 
 export function uiState(state: UIState | undefined, action: AppAction): UIState {
