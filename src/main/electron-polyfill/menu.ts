@@ -1,4 +1,4 @@
-import { Observable } from './observable'
+import { ObservableValue } from './observable-value'
 
 type MenuItemType = 'separator'
 
@@ -18,6 +18,7 @@ export type MenuItemConstructorOptions = {
 export class Menu {
   private static applicationMenu = new Menu([])
 
+  readonly visible = new ObservableValue(true)
   readonly items: readonly MenuItem[]
   private readonly itemsById = new Map<string, MenuItem>()
 
@@ -65,7 +66,7 @@ export class MenuItem {
   readonly accelerator?: MenuItemAccelerator
   readonly click?: () => void
   readonly submenu: readonly MenuItem[]
-  readonly enabled = new Observable(true)
+  readonly enabled = new ObservableValue(true)
 
   constructor(options: MenuItemConstructorOptions) {
     this.type = options.type

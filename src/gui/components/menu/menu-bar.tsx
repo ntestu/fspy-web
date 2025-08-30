@@ -5,19 +5,27 @@ import {
   MenuItem as SzhsinMenuItem,
   SubMenu as SzhsinSubMenu,
 } from '@szhsin/react-menu'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import packageJson from '../../../../package.json' with { type: 'json' }
 import {
   MenuItem as ElectronMenuItem,
   Menu,
   MenuItemAccelerator,
 } from '../../../main/electron-polyfill/menu'
+import { useObservableState } from '../../../main/electron-polyfill/observable-value'
 import './menu-bar.css'
 
 export default function MenuBar() {
+  const menu = Menu.getApplicationMenu()
+  const visible = useObservableState(menu.visible)
+
+  if (!visible) {
+    return null
+  }
+
   return (
     <nav className="menu-bar">
-      {Menu.getApplicationMenu().items.map((baseItem, index) => (
+      {menu.items.map((baseItem, index) => (
         <SzhsinMenu
           key={baseItem.id ?? index}
           menuButton={<MenuButton>{baseItem.label}</MenuButton>}
@@ -52,7 +60,7 @@ function renderMenuItem(item: ElectronMenuItem, index: number) {
 }
 
 function SubMenu({ item }: { item: ElectronMenuItem }) {
-  const enabled = useEnabledState(item)
+  const enabled = useObservableState(item.enabled)
   return (
     <SzhsinSubMenu
       label={renderMenuItemLabel(item)}
@@ -65,18 +73,12 @@ function SubMenu({ item }: { item: ElectronMenuItem }) {
 }
 
 function MenuItem({ item }: { item: ElectronMenuItem }) {
-  const enabled = useEnabledState(item)
+  const enabled = useObservableState(item.enabled)
   return (
     <SzhsinMenuItem onClick={item.click} disabled={!enabled}>
       {renderMenuItemLabel(item)}
     </SzhsinMenuItem>
   )
-}
-
-function useEnabledState(item: ElectronMenuItem): boolean {
-  const [enabled, setEnabled] = useState(item.enabled.get())
-  useEffect(() => item.enabled.useListener(setEnabled), [item.enabled])
-  return enabled
 }
 
 function renderMenuItemLabel(item: ElectronMenuItem) {

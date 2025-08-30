@@ -1,4 +1,5 @@
 import { ipcRenderer } from './ipc'
+import { Menu } from './menu'
 
 type EventName =
   | 'ready-to-show'
@@ -60,6 +61,6 @@ export class BrowserWindow {
   }
 
   setMenuBarVisibility(visible: boolean): void {
-    // TODO
+    Menu.getApplicationMenu().visible.set(visible)
   }
 }
