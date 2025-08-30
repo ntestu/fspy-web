@@ -48,11 +48,11 @@ interface AppProps {
   solverResult: SolverResult,
   image: ImageState,
   onImageFileDropped(imagePath: string): void
-  onProjectFileDropped(imagePath: string): void
+  onProjectFileDropped(filePath: string, buffer: Buffer): void
   onOpenExampleProjectPressed(): void
 
   onNewProjectIPCMessage(): void
-  onOpenProjectIPCMessage(filePath: string, isExampleProject: boolean): void
+  onOpenProjectIPCMessage(filePath: string, buffer: Buffer, isExampleProject: boolean): void
   onSaveProjectAsIPCMessage(filePath: string): void
   onOpenImageIPCMessage(imagePath: string): void
   onExportIPCMessage(exportType: ExportType): void
@@ -87,15 +87,17 @@ class App extends React.PureComponent<AppProps> {
       if (ev.dataTransfer != null) {
         let firstFile = ev.dataTransfer.files[0]
         if (firstFile) {
-          // TODO(ntestu)
-          // let filePath = firstFile.path
-          // let isProjectFile = ProjectFile.isProjectFile(filePath)
-          // if (isProjectFile) {
-          //   this.props.onProjectFileDropped(filePath)
-          // } else {
-          //   // try to open the file as an image
-          //   this.props.onImageFileDropped(filePath)
-          // }
+          let filePath = firstFile.name
+          firstFile.arrayBuffer().then(arrayBuffer => {
+            const buffer = Buffer.from(arrayBuffer)
+            let isProjectFile = ProjectFile.isProjectFile(buffer)
+            if (isProjectFile) {
+              this.props.onProjectFileDropped(filePath, buffer)
+            } else {
+              // try to open the file as an image
+              this.props.onImageFileDropped(filePath)
+            }
+          }).catch((error: unknown) => console.error('Failed to load dropped file:', error))
         }
         ev.preventDefault()
         return false
@@ -128,7 +130,7 @@ class App extends React.PureComponent<AppProps> {
     })
 
     ipcRenderer.on(OpenProjectMessage.type, (_: any, message: OpenProjectMessage) => {
-      this.props.onOpenProjectIPCMessage(message.filePath, message.isExampleProject)
+      this.props.onOpenProjectIPCMessage(message.filePath, message.buffer, message.isExampleProject)
     })
 
     ipcRenderer.on(SaveProjectMessage.type, (_: any, __: SaveProjectMessage) => {
@@ -185,10 +187,10 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
       //   }
       // )
     },
-    onProjectFileDropped: (projectPath: string) => {
+    onProjectFileDropped: (projectPath: string, buffer: Buffer) => {
       ipcRenderer.send(
         OpenDroppedProjectMessage.type,
-        new OpenDroppedProjectMessage(projectPath)
+        new OpenDroppedProjectMessage(projectPath, buffer)
       )
     },
     onOpenExampleProjectPressed: () => {
@@ -197,9 +199,8 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
     onNewProjectIPCMessage: () => {
       dispatch(loadDefaultState())
     },
-    onOpenProjectIPCMessage: (filePath: string, isExampleProject: boolean) => {
-      // TODO(ntestu)
-      ProjectFile.load(filePath, Buffer.alloc(0), dispatch, isExampleProject)
+    onOpenProjectIPCMessage: (filePath: string, buffer: Buffer, isExampleProject: boolean) => {
+      ProjectFile.load(filePath, buffer, dispatch, isExampleProject)
     },
     onSaveProjectAsIPCMessage: (filePath: string) => {
       ProjectFile.save(filePath, dispatch)

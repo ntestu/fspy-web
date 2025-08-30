@@ -27,6 +27,8 @@ import { BrowserWindow } from './electron-polyfill/browser-window'
 import { dialog } from './electron-polyfill/dialog'
 import { ipcMain } from './electron-polyfill/ipc'
 import { Menu } from './electron-polyfill/menu'
+import { fetchBytesSync } from '../gui/io/util'
+import type { Buffer } from 'buffer'
 
 export interface DocumentState {
   hasUnsavedChanges: boolean
@@ -38,10 +40,10 @@ let documentState: DocumentState | null = null
 
 createWindow()
 
-function openProject(path: string, window: BrowserWindow) {
+function openProject(path: string, buffer: Buffer, window: BrowserWindow) {
   window.webContents.send(
     OpenProjectMessage.type,
-    new OpenProjectMessage(path, false)
+    new OpenProjectMessage(path, buffer, false)
   )
 }
 
@@ -72,6 +74,7 @@ function createWindow() {
               }
             ).then((result) => {
               if (!result.canceled) {
+                // TODO(ntestu)
                 openProject(result.filePaths[0], window)
               }
             }).catch((error: unknown) => {
@@ -108,7 +111,7 @@ function createWindow() {
             let projectPath = ProjectFile.exampleProjectPath
             window.webContents.send(
               OpenProjectMessage.type,
-              new OpenProjectMessage(projectPath, true)
+              new OpenProjectMessage(projectPath, fetchBytesSync(projectPath), true)
             )
           }
         })
@@ -211,7 +214,7 @@ function createWindow() {
   ipcMain.on(OpenDroppedProjectMessage.type, (_: any, message: OpenDroppedProjectMessage) => {
     showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
       if (!didCancel) {
-        openProject(message.filePath, window)
+        openProject(message.filePath, message.buffer, window)
       }
     })
   })

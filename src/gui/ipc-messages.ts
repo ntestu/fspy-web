@@ -17,6 +17,7 @@
  */
 
 import { ExportType } from '../main/ipc-messages'
+import type { Buffer } from 'buffer'
 
 // Messages sent from the renderer process to the main process
 
@@ -37,8 +38,10 @@ export class SpecifyExportPathMessage {
 export class OpenDroppedProjectMessage {
   static readonly type = 'OpenDroppedProjectMessage'
   readonly filePath: string
-  constructor(filePath: string) {
+  readonly buffer: Buffer
+  constructor(filePath: string, buffer: Buffer) {
     this.filePath = filePath
+    this.buffer = buffer
   }
 }
 

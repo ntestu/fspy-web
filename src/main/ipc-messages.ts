@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { Buffer } from 'buffer'
+
 // Messages sent from the main process to the renderer process
 
 export class NewProjectMessage {
@@ -25,10 +27,12 @@ export class NewProjectMessage {
 export class OpenProjectMessage {
   static readonly type = 'openProject'
   readonly filePath: string
+  readonly buffer: Buffer
   readonly isExampleProject: boolean
 
-  constructor(filePath: string, isExampleProject: boolean) {
+  constructor(filePath: string, buffer: Buffer, isExampleProject: boolean) {
     this.filePath = filePath
+    this.buffer = buffer
     this.isExampleProject = isExampleProject
   }
 }
