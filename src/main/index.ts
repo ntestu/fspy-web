@@ -21,7 +21,7 @@ import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, SaveProjectAs
 import { SpecifyProjectPathMessage, SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
 import AppMenuManager from './app-menu-manager'
 import ProjectFile from '../gui/io/project-file'
-// TODO
+// TODO(ntestu)
 // import { openSync, writeSync, closeSync } from 'fs'
 import { BrowserWindow } from './electron-polyfill/browser-window'
 import { dialog } from './electron-polyfill/dialog'
@@ -152,7 +152,7 @@ function createWindow() {
   window.on('close', () => {
     showDiscardChangesDialogIfNeeded((didCancel: boolean) => {
       if (didCancel) {
-        // TODO
+        // TODO(ntestu)
         // event.preventDefault()
       }
     })
@@ -198,7 +198,7 @@ function createWindow() {
       {}
     ).then((result) => {
       if (!result.canceled && result.filePath) {
-        // TODO
+        // TODO(ntestu)
         // let file = openSync(result.filePath, 'w')
         // writeSync(file, message.data)
         // closeSync(file)

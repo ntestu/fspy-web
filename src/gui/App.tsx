@@ -23,7 +23,7 @@ import SettingsContainer from './containers/settings-container'
 
 import { StoreState } from './types/store-state'
 import { connect } from 'react-redux'
-// TODO
+// TODO(ntestu)
 import { AppAction, setImage, loadDefaultState, setSidePanelVisibility } from './actions'
 import { GlobalSettings } from './types/global-settings'
 import { UIState } from './types/ui-state'
@@ -87,7 +87,7 @@ class App extends React.PureComponent<AppProps> {
       if (ev.dataTransfer != null) {
         let firstFile = ev.dataTransfer.files[0]
         if (firstFile) {
-          // TODO
+          // TODO(ntestu)
           // let filePath = firstFile.path
           // let isProjectFile = ProjectFile.isProjectFile(filePath)
           // if (isProjectFile) {
@@ -169,7 +169,7 @@ export function mapStateToProps(state: StoreState) {
 export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
   return {
     onImageFileDropped: (imagePath: string) => {
-      // TODO
+      // TODO(ntestu)
       // let imageBuffer = readFileSync(imagePath)
       // // TODO: good to do async loading here?
       // loadImage(
@@ -198,14 +198,14 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
       dispatch(loadDefaultState())
     },
     onOpenProjectIPCMessage: (filePath: string, isExampleProject: boolean) => {
-      // TODO
+      // TODO(ntestu)
       ProjectFile.load(filePath, Buffer.alloc(0), dispatch, isExampleProject)
     },
     onSaveProjectAsIPCMessage: (filePath: string) => {
       ProjectFile.save(filePath, dispatch)
     },
     onOpenImageIPCMessage: (imagePath: string) => {
-      // TODO
+      // TODO(ntestu)
       // let imageBuffer = readFileSync(imagePath)
       // loadImage(
       //   imageBuffer,

@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO
-// import { join } from 'path'
 import { Buffer } from 'buffer'
 import syncFetch from 'sync-fetch'
 
@@ -26,7 +24,7 @@ export function loadImage(
   onLoad: (width: number, height: number, url: string) => void,
   onError: () => void
 ) {
-  let blob = new Blob([imageBuffer as any]) // TODO remove cast
+  let blob = new Blob([imageBuffer as any]) // TODO(ntestu): remove cast
   let url = URL.createObjectURL(blob)
   let image = new Image()
   image.src = url
@@ -50,6 +48,6 @@ export function resourcePath(fileName: string): string {
 }
 
 export function fetchBytesSync(url: string): Buffer {
-  // TODO: use async fetch instead
+  // TODO(ntestu): use async fetch instead
   return Buffer.from(syncFetch(url).arrayBuffer())
 }

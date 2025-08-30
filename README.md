@@ -15,7 +15,7 @@ Interested in writing an importer for your favorite application? Then the [fSpy 
 
 ## Building and running
 
-<!-- TODO: url -->
+<!-- TODO(ntestu): url -->
 The following instructions are for developers. If you just want to use the app, head to the web application or [download the latest executable for your platform](https://github.com/stuffmatic/fSpy/releases).
 
 fspy-web is written in [Typescript](https://www.typescriptlang.org) using [Vite](https://vite.dev), [React](https://reactjs.org) and [Redux](https://redux.js.org). [Visual Studio Code](https://code.visualstudio.com) is recommended for a pleasant editing experience.

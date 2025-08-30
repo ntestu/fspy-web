@@ -154,7 +154,7 @@ export function setProjectHasUnsavedChanges(): SetProjectHasUnsavedChanged {
 }
 
 //
-// TODO change to SetProjectFileName
+// TODO(ntestu) change to SetProjectFileName
 export interface SetProjectFilePath {
   type: ActionTypes.SET_PROJECT_FILE_PATH
   projectFilePath: string

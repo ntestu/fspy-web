@@ -26,7 +26,7 @@ class Dialog {
   }
 
   showOpenDialog(options: OpenDialogOptions): Promise<OpenDialogReturnValue> {
-    // TODO
+    // TODO(ntestu)
     return Promise.resolve({
       canceled: true,
       filePaths: [],
@@ -34,7 +34,7 @@ class Dialog {
   }
 
   showSaveDialog(options: object): Promise<SaveDialogReturnValue> {
-    // TODO
+    // TODO(ntestu)
     return Promise.resolve({ canceled: true })
   }
 }

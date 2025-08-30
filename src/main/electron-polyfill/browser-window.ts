@@ -31,7 +31,7 @@ export class BrowserWindow {
         listener()
         break
       case 'close':
-        // TODO
+        // TODO(ntestu)
         break
       case 'enter-full-screen':
         this.enterFullScreenListeners.push(listener)

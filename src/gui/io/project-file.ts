@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO
+// TODO(ntestu)
 // import { openSync, writeSync, closeSync, readFileSync, readSync } from 'fs'
 import store from '../store/store'
 import { StoreState } from '../types/store-state'
@@ -79,7 +79,7 @@ export default class ProjectFile {
     headerBuffer.writeUInt32LE(stateBuffer.length, 8)
     headerBuffer.writeUInt32LE(imageData ? imageData.length : 0, 12)
 
-    // TODO
+    // TODO(ntestu)
     // let file = openSync(path, 'w')
     // writeSync(file, headerBuffer)
     // writeSync(file, stateBuffer)
