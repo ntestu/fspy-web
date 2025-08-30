@@ -45,7 +45,7 @@ export class BrowserWindow {
     }
   }
 
-  isFullScreen(): boolean {
+  private isFullScreen(): boolean {
     return document.fullscreenElement !== null
   }
 

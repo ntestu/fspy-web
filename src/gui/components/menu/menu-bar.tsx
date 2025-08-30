@@ -1,15 +1,15 @@
 import {
-  Menu,
   MenuButton,
   MenuDivider,
-  MenuItem,
-  SubMenu,
+  Menu as SzhsinMenu,
+  MenuItem as SzhsinMenuItem,
+  SubMenu as SzhsinSubMenu,
 } from '@szhsin/react-menu'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import packageJson from '../../../../package.json' with { type: 'json' }
 import {
-  Menu as ElectronMenu,
   MenuItem as ElectronMenuItem,
+  Menu,
   MenuItemAccelerator,
 } from '../../../main/electron-polyfill/menu'
 import './menu-bar.css'
@@ -17,20 +17,20 @@ import './menu-bar.css'
 export default function MenuBar() {
   return (
     <nav className="menu-bar">
-      {ElectronMenu.getApplicationMenu().items.map((baseItem, index) => (
-        <Menu
+      {Menu.getApplicationMenu().items.map((baseItem, index) => (
+        <SzhsinMenu
           key={baseItem.id ?? index}
           menuButton={<MenuButton>{baseItem.label}</MenuButton>}
         >
           {baseItem.submenu.map(renderMenuItem)}
-        </Menu>
+        </SzhsinMenu>
       ))}
 
-      <Menu menuButton={<MenuButton>Help</MenuButton>}>
-        <MenuItem href={packageJson.repository.url} target="_blank">
+      <SzhsinMenu menuButton={<MenuButton>Help</MenuButton>}>
+        <SzhsinMenuItem href={packageJson.repository.url} target="_blank">
           GitHub
-        </MenuItem>
-      </Menu>
+        </SzhsinMenuItem>
+      </SzhsinMenu>
 
       <div style={{ flexGrow: 1 }} />
 
@@ -40,28 +40,43 @@ export default function MenuBar() {
 }
 
 function renderMenuItem(item: ElectronMenuItem, index: number) {
-  const id = item.id ?? index
+  const key = item.id ?? index
 
   if (item.type === 'separator') {
-    return <MenuDivider key={id} />
+    return <MenuDivider key={key} />
   } else if (hasSubMenu(item)) {
-    return (
-      <SubMenu
-        key={id}
-        label={renderMenuItemLabel(item)}
-        onClick={item.click}
-        disabled={!item.enabled}
-      >
-        {item.submenu.map(renderMenuItem)}
-      </SubMenu>
-    )
+    return <SubMenu key={key} item={item} />
   } else {
-    return (
-      <MenuItem key={id} onClick={item.click} disabled={!item.enabled}>
-        {renderMenuItemLabel(item)}
-      </MenuItem>
-    )
+    return <MenuItem key={key} item={item} />
   }
+}
+
+function SubMenu({ item }: { item: ElectronMenuItem }) {
+  const enabled = useEnabledState(item)
+  return (
+    <SzhsinSubMenu
+      label={renderMenuItemLabel(item)}
+      onClick={item.click}
+      disabled={!enabled}
+    >
+      {item.submenu.map(renderMenuItem)}
+    </SzhsinSubMenu>
+  )
+}
+
+function MenuItem({ item }: { item: ElectronMenuItem }) {
+  const enabled = useEnabledState(item)
+  return (
+    <SzhsinMenuItem onClick={item.click} disabled={!enabled}>
+      {renderMenuItemLabel(item)}
+    </SzhsinMenuItem>
+  )
+}
+
+function useEnabledState(item: ElectronMenuItem): boolean {
+  const [enabled, setEnabled] = useState(item.enabled.get())
+  useEffect(() => item.enabled.useListener(setEnabled), [item.enabled])
+  return enabled
 }
 
 function renderMenuItemLabel(item: ElectronMenuItem) {

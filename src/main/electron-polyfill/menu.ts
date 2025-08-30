@@ -1,3 +1,5 @@
+import { Observable } from './observable'
+
 type MenuItemType = 'separator'
 
 export type MenuItemConstructorOptions = {
@@ -63,7 +65,7 @@ export class MenuItem {
   readonly accelerator?: MenuItemAccelerator
   readonly click?: () => void
   readonly submenu: readonly MenuItem[]
-  private _enabled = true
+  readonly enabled = new Observable(true)
 
   constructor(options: MenuItemConstructorOptions) {
     this.type = options.type
@@ -79,15 +81,6 @@ export class MenuItem {
     this.click = options.click
     this.submenu =
       options.submenu?.map(subOptions => new MenuItem(subOptions)) ?? []
-  }
-
-  get enabled() {
-    return this._enabled
-  }
-
-  set enabled(value: boolean) {
-    this._enabled = value
-    // TODO notify listeners
   }
 }
 

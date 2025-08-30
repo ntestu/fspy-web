@@ -126,18 +126,12 @@ function createWindow() {
         )
       },
       onEnterFullScreenMode: () => {
-        window.webContents.send(
-          SetSidePanelVisibilityMessage.type,
-          new SetSidePanelVisibilityMessage(false)
-        )
         window.setFullScreen(true)
+          .catch((error: unknown) => console.error('Failed to enter full screen:', error))
       },
       onExitFullScreenMode: () => {
-        window.webContents.send(
-          SetSidePanelVisibilityMessage.type,
-          new SetSidePanelVisibilityMessage(true)
-        )
         window.setFullScreen(false)
+          .catch((error: unknown) => console.error('Failed to exit full screen:', error))
       }
     }
   )
@@ -165,6 +159,10 @@ function createWindow() {
   })
 
   window.on('enter-full-screen', () => {
+    window.webContents.send(
+      SetSidePanelVisibilityMessage.type,
+      new SetSidePanelVisibilityMessage(false)
+    )
     appMenuManager.setEnterFullScreenItemEnabled(false)
     appMenuManager.setExitFullScreenItemEnabled(true)
     window.setMenuBarVisibility(false)

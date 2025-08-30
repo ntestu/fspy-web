@@ -113,49 +113,52 @@ export default class AppMenuManager {
     }
 
     let menus = [fileMenu]
-    let viewMenu = {
-      label: 'View',
-      submenu: [
-        {
-          label: 'Enter full screen mode',
-          id: 'enter-full-screen',
-          accelerator: { control: true, key: 'F' },
-          click: () => {
-            this.callbacks.onEnterFullScreenMode()
+
+    if (document.fullscreenEnabled) {
+      let viewMenu = {
+        label: 'View',
+        submenu: [
+          {
+            label: 'Enter full screen mode',
+            id: 'enter-full-screen',
+            accelerator: { control: true, key: 'F' },
+            click: () => {
+              this.callbacks.onEnterFullScreenMode()
+            },
           },
-        },
-        {
-          label: 'Exit full screen mode',
-          id: 'exit-full-screen',
-          accelerator: { key: 'Escape' },
-          click: () => {
-            this.callbacks.onExitFullScreenMode()
+          {
+            label: 'Exit full screen mode',
+            id: 'exit-full-screen',
+            accelerator: { key: 'Escape' },
+            click: () => {
+              this.callbacks.onExitFullScreenMode()
+            },
           },
-        },
-      ],
+        ],
+      }
+      menus.push(viewMenu)
     }
-    menus.push(viewMenu)
 
     this.menu = Menu.buildFromTemplate(menus)
   }
 
   setOpenImageItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('open-image').enabled = enabled
+    this.menu.getMenuItemById('open-image').enabled.set(enabled)
   }
 
   setSaveItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('save').enabled = enabled
+    this.menu.getMenuItemById('save').enabled.set(enabled)
   }
 
   setSaveAsItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('save-as').enabled = enabled
+    this.menu.getMenuItemById('save-as').enabled.set(enabled)
   }
 
   setEnterFullScreenItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('enter-full-screen').enabled = enabled
+    this.menu.getMenuItemById('enter-full-screen').enabled.set(enabled)
   }
 
   setExitFullScreenItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('exit-full-screen').enabled = enabled
+    this.menu.getMenuItemById('exit-full-screen').enabled.set(enabled)
   }
 }
