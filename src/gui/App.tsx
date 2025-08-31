@@ -48,14 +48,14 @@ interface AppStateProps {
 }
 
 interface AppDispatchProps {
-  onImageFileDropped(fileName: string, imageBuffer: Buffer): void
+  onImageFileDropped(fileName: string, imageBuffer: Buffer<ArrayBuffer>): void
   onProjectFileDropped(filePath: string, buffer: Buffer): void
   onOpenExampleProjectPressed(): void
 
   onNewProjectIPCMessage(): void
   onOpenProjectIPCMessage(filePath: string, buffer: Buffer, isExampleProject: boolean): void
   onSaveProjectAsIPCMessage(projectName: string | null): void
-  onOpenImageIPCMessage(fileName: string, imageBuffer: Buffer): void
+  onOpenImageIPCMessage(fileName: string, imageBuffer: Buffer<ArrayBuffer>): void
   onExportIPCMessage(exportType: ExportType): void
   onSetSidePanelVisibilityIPCMessage(panelsAreVisible: boolean): void
 }
@@ -165,7 +165,7 @@ export function mapStateToProps(state: StoreState): AppStateProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchProps {
   return {
-    onImageFileDropped: (fileName: string, imageBuffer: Buffer) => {
+    onImageFileDropped: (fileName: string, imageBuffer: Buffer<ArrayBuffer>) => {
       loadImage(
         imageBuffer,
         (width: number, height: number, url: string) => {
@@ -197,7 +197,7 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchPr
     onSaveProjectAsIPCMessage: (projectName: string | null) => {
       ProjectFile.save(projectName)
     },
-    onOpenImageIPCMessage: (fileName: string, imageBuffer: Buffer) => {
+    onOpenImageIPCMessage: (fileName: string, imageBuffer: Buffer<ArrayBuffer>) => {
       loadImage(
         imageBuffer,
         (width: number, height: number, url: string) => {

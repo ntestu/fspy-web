@@ -82,7 +82,7 @@ export default class ProjectFile {
 
     const blobParts = [headerBuffer, stateBuffer]
     if (imageData) {
-      blobParts.push(imageData as any) // TODO(ntestu): remove cast
+      blobParts.push(imageData)
     }
     const blob = new Blob(blobParts, { type: 'application/octet-stream' })
     saveAs(blob, fileName)
@@ -111,7 +111,7 @@ export default class ProjectFile {
         let stateStringBuffer = buffer.slice(headerSize, headerSize + stateStringSize)
         let stateString = stateStringBuffer.toString()
         let imageBufferSize = buffer.readUInt32LE(12)
-        let imageBuffer: Buffer | null = null
+        let imageBuffer: Buffer<ArrayBuffer> | null = null
         if (imageBufferSize > 0) {
           imageBuffer = buffer.slice(headerSize + stateStringSize)
         }

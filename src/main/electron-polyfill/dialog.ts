@@ -15,7 +15,7 @@ type OpenDialogReturnValue =
   | {
       canceled: false
       filePaths: string[]
-      buffers: Buffer[]
+      buffers: Buffer<ArrayBuffer>[]
     }
 
 type SaveDialogReturnValue =
