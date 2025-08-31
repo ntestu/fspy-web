@@ -67,15 +67,12 @@ function createWindow() {
           if (!didCancel) {
             dialog.showOpenDialog(
               {
-                filters: [
-                  { name: 'fSpy project files', extensions: ['fspy'] }
-                ],
+                accept: '.fspy',
                 properties: ['openFile']
               }
             ).then((result) => {
               if (!result.canceled) {
-                // TODO(ntestu)
-                openProject(result.filePaths[0], window)
+                openProject(result.filePaths[0], result.buffers[0], window)
               }
             }).catch((error: unknown) => {
               console.error('Failed to open project', error)
@@ -92,6 +89,7 @@ function createWindow() {
       onOpenImage: () => {
         dialog.showOpenDialog(
           {
+            accept: 'image/*',
             properties: ['openFile']
           }
         ).then((result) => {
