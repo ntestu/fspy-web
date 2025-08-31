@@ -1,3 +1,4 @@
+import { addListenerForAccelerators } from './menu-keybinds'
 import { ObservableValue } from './observable-value'
 
 type MenuItemType = 'separator'
@@ -8,6 +9,7 @@ export type MenuItemConstructorOptions = {
   id?: string
   accelerator?: {
     control?: boolean
+    alt?: boolean
     shift?: boolean
     key: string
   }
@@ -16,7 +18,7 @@ export type MenuItemConstructorOptions = {
 }
 
 export class Menu {
-  private static applicationMenu = new Menu([])
+  private static applicationMenu: Menu | undefined
 
   readonly visible = new ObservableValue(true)
   readonly items: readonly MenuItem[]
@@ -42,11 +44,20 @@ export class Menu {
   }
 
   static setApplicationMenu(menu: Menu): void {
-    Menu.applicationMenu = menu
+    if (this.applicationMenu) {
+      throw new Error('An application menu has already been set')
+    }
+
+    this.applicationMenu = menu
+    addListenerForAccelerators(menu)
   }
 
   static getApplicationMenu(): Menu {
-    return Menu.applicationMenu
+    if (this.applicationMenu) {
+      return this.applicationMenu
+    } else {
+      throw new Error('No application menu set')
+    }
   }
 
   getMenuItemById(id: string): MenuItem {
@@ -75,6 +86,7 @@ export class MenuItem {
     this.accelerator = options.accelerator
       ? {
           control: options.accelerator.control ?? false,
+          alt: options.accelerator.alt ?? false,
           shift: options.accelerator.shift ?? false,
           key: options.accelerator.key,
         }
@@ -87,6 +99,7 @@ export class MenuItem {
 
 export type MenuItemAccelerator = {
   control: boolean
+  alt: boolean
   shift: boolean
   key: string
 }

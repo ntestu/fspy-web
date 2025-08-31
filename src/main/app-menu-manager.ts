@@ -39,7 +39,7 @@ export default class AppMenuManager {
 
     let newItem: MenuItemConstructorOptions = {
       label: 'New',
-      accelerator: { control: true, key: 'N' },
+      // accelerator: { control: true, key: 'N' }, // (Can't override Ctrl+N in Chrome/Firefox)
       click: () => {
         this.callbacks.onNewProject()
       },
@@ -53,7 +53,7 @@ export default class AppMenuManager {
       },
     }
 
-    let saveItem = {
+    let saveItem: MenuItemConstructorOptions = {
       label: 'Save',
       id: 'save',
       accelerator: { control: true, key: 'S' },
@@ -62,7 +62,7 @@ export default class AppMenuManager {
       },
     }
 
-    let openExampleProjectItem = {
+    let openExampleProjectItem: MenuItemConstructorOptions = {
       label: 'Open example project',
       id: 'open-example-project',
       click: () => {
@@ -70,7 +70,7 @@ export default class AppMenuManager {
       },
     }
 
-    let openImageItem = {
+    let openImageItem: MenuItemConstructorOptions = {
       label: 'Open image',
       id: 'open-image',
       accelerator: { control: true, shift: true, key: 'O' },
@@ -107,7 +107,7 @@ export default class AppMenuManager {
       },
     ]
 
-    let fileMenu = {
+    let fileMenu: MenuItemConstructorOptions = {
       label: 'File',
       submenu: fileMenuItems,
     }
@@ -115,13 +115,13 @@ export default class AppMenuManager {
     let menus = [fileMenu]
 
     if (document.fullscreenEnabled) {
-      let viewMenu = {
+      let viewMenu: MenuItemConstructorOptions = {
         label: 'View',
         submenu: [
           {
             label: 'Enter full screen mode',
             id: 'enter-full-screen',
-            accelerator: { control: true, key: 'F' },
+            accelerator: { alt: true, key: 'Enter' },
             click: () => {
               this.callbacks.onEnterFullScreenMode()
             },
