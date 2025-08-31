@@ -35,7 +35,7 @@ export default function MenuBar() {
       ))}
 
       <SzhsinMenu menuButton={<MenuButton>Help</MenuButton>}>
-        <SzhsinMenuItem href={packageJson.repository.url} target="_blank">
+        <SzhsinMenuItem href={packageJson.repository.url.replace(/\.git$/, '')} target="_blank">
           GitHub
         </SzhsinMenuItem>
       </SzhsinMenu>

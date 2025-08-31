@@ -232,7 +232,7 @@ function createWindow() {
       if (documentState.isExampleProject) {
         title = 'Example project'
       } else if (documentState.filePath !== null) {
-        title = basename(documentState.filePath)
+        title = documentState.filePath
       } else {
         title = 'Untitled'
       }
@@ -276,8 +276,4 @@ function showDiscardChangesDialogIfNeeded(callback: (didCancel: boolean) => void
   } else {
     callback(false)
   }
-}
-
-function basename(path: string) {
-  return path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
 }
