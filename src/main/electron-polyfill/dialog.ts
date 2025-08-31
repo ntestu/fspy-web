@@ -63,7 +63,7 @@ class Dialog {
     })
   }
 
-  showSaveDialog(options: object): Promise<SaveDialogReturnValue> {
+  showSaveDialog(_options: object): Promise<SaveDialogReturnValue> {
     // TODO(ntestu)
     return Promise.resolve({ canceled: true })
   }

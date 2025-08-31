@@ -179,7 +179,7 @@ function createWindow() {
     window.setMenuBarVisibility(true)
   })
 
-  ipcMain.on(SpecifyExportPathMessage.type, (_: any, message: SpecifyExportPathMessage) => {
+  ipcMain.on(SpecifyExportPathMessage.type, (_: any, _message: SpecifyExportPathMessage) => {
     dialog.showSaveDialog(
       {}
     ).then((result) => {
