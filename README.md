@@ -25,6 +25,7 @@ Useful commands are:
 - `pnpm start`: run the app in development mode
 - `pnpm build`: build the app for production
 - `pnpm preview`: locally preview the built production app
+- `pnpm run deploy`: build and deploy to GitHub Pages (by committing the built app on branch `gh-pages`)
 
 Note that this fork aims to make as few changes as possible to files from the base repo in order to minimize potential merge conflicts.
 This comes at the cost of some parts of the code being less idiomatic, e.g. anything mentioning Electron despite the project not depending on Electron anymore.

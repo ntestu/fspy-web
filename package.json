@@ -28,8 +28,8 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "gh-pages": "^6.1.1",
     "globals": "^16.3.0",
-    "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
@@ -37,6 +37,7 @@
   },
   "scripts": {
     "build": "tsc -b && vite build",
+    "deploy": "pnpm build && gh-pages --dist dist/",
     "dev": "vite",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
