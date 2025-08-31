@@ -150,10 +150,6 @@ export default class AppMenuManager {
     this.menu.getMenuItemById('save').enabled.set(enabled)
   }
 
-  setSaveAsItemEnabled(enabled: boolean) {
-    this.menu.getMenuItemById('save-as').enabled.set(enabled)
-  }
-
   setEnterFullScreenItemEnabled(enabled: boolean) {
     this.menu.getMenuItemById('enter-full-screen').enabled.set(enabled)
   }

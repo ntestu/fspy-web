@@ -39,15 +39,6 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
         ...state,
         projectHasUnsavedChanges: true
       }
-    case ActionTypes.SET_PROJECT_FILE_PATH:
-      ipcRenderer.send(
-        SetDocumentStateMessage.type,
-        new SetDocumentStateMessage(false, action.projectFilePath, false)
-      )
-      return {
-        ...state,
-        projectFilePath: action.projectFilePath
-      }
     case ActionTypes.LOAD_DEFAULT_STATE:
       ipcRenderer.send(
         SetDocumentStateMessage.type,
@@ -56,7 +47,7 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
       return {
         ...state,
         projectHasUnsavedChanges: false,
-        projectFilePath: null
+        projectName: null
       }
     case ActionTypes.SET_SIDE_PANEL_VISIBILITY:
       return {
@@ -68,14 +59,14 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
         SetDocumentStateMessage.type,
         new SetDocumentStateMessage(
           false,
-          action.projectFilePath,
+          action.projectName,
           action.isExampleProject
         )
       )
       return {
         ...state,
         projectHasUnsavedChanges: false,
-        projectFilePath: action.isExampleProject ? null : action.projectFilePath
+        projectName: action.isExampleProject ? null : action.projectName
       }
   }
 

@@ -16,12 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO(ntestu)
-// import { openSync, writeSync, closeSync, readFileSync, readSync } from 'fs'
 import store from '../store/store'
 import { StoreState } from '../types/store-state'
 import SavedState from './saved-state'
-import { AppAction, loadState, setProjectFilePath } from '../actions'
+import { AppAction, loadState } from '../actions'
 import { Dispatch } from 'redux'
 import { fetchBytesSync, loadImage, resourcePath } from './util'
 import { remote } from '../../main/electron-polyfill/remote'
@@ -29,6 +27,7 @@ import { defaultResultDisplaySettings } from '../defaults/result-display-setting
 import { cameraPresets } from '../solver/camera-presets'
 import { ReferenceDistanceUnit } from '../types/calibration-settings'
 import { Buffer } from 'buffer'
+import { saveAs } from 'file-saver'
 
 export default class ProjectFile {
   static readonly EXAMPLE_PROJECT_FILENAME = 'example.fspy'
@@ -55,10 +54,11 @@ export default class ProjectFile {
     }
   }
 
-  static save(path: string, dispatch: Dispatch<AppAction>) {
+  static save(projectName: string | null) {
+    let fileName = projectName ?? 'Untitled';
 
-    if (!path.endsWith('.' + this.PROJECT_FILE_EXTENSION)) {
-      path += '.' + this.PROJECT_FILE_EXTENSION
+    if (!fileName.endsWith('.' + this.PROJECT_FILE_EXTENSION)) {
+      fileName += '.' + this.PROJECT_FILE_EXTENSION
     }
 
     let storeState: StoreState = store.getState()
@@ -79,15 +79,12 @@ export default class ProjectFile {
     headerBuffer.writeUInt32LE(stateBuffer.length, 8)
     headerBuffer.writeUInt32LE(imageData ? imageData.length : 0, 12)
 
-    // TODO(ntestu)
-    // let file = openSync(path, 'w')
-    // writeSync(file, headerBuffer)
-    // writeSync(file, stateBuffer)
-    // if (imageData) {
-    //   writeSync(file, imageData)
-    // }
-    // closeSync(file)
-    dispatch(setProjectFilePath(path))
+    const blobParts = [headerBuffer, stateBuffer]
+    if (imageData) {
+      blobParts.push(imageData as any) // TODO(ntestu): remove cast
+    }
+    const blob = new Blob(blobParts, { type: 'application/octet-stream' })
+    saveAs(blob, fileName)
   }
 
   static loadExample(dispatch: Dispatch<AppAction>) {

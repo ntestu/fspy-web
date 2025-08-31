@@ -34,7 +34,6 @@ export enum ActionTypes {
   LOAD_DEFAULT_STATE = 'LOAD_DEFAULT_STATE',
   LOAD_STATE = 'LOAD_STATE',
   SET_PROJECT_HAS_UNSAVED_CHANGES = 'SET_PROJECT_HAS_UNSAVED_CHANGES',
-  SET_PROJECT_FILE_PATH = 'SET_PROJECT_FILE_PATH',
 
   // Global settings actions
   SET_CALIBRATION_MODE = 'SET_CALIBRATION_MODE',
@@ -123,21 +122,21 @@ export interface LoadState {
   type: ActionTypes.LOAD_STATE,
   savedState: SavedState,
   imageState: ImageState,
-  projectFilePath: string,
+  projectName: string,
   isExampleProject: boolean
 }
 
 export function loadState(
   savedState: SavedState,
   imageState: ImageState,
-  projectFilePath: string,
+  projectName: string,
   isExampleProject: boolean
 ): LoadState {
   return {
     type: ActionTypes.LOAD_STATE,
     savedState: savedState,
     imageState: imageState,
-    projectFilePath: projectFilePath,
+    projectName: projectName,
     isExampleProject: isExampleProject
   }
 }
@@ -150,20 +149,6 @@ export interface SetProjectHasUnsavedChanged {
 export function setProjectHasUnsavedChanges(): SetProjectHasUnsavedChanged {
   return {
     type: ActionTypes.SET_PROJECT_HAS_UNSAVED_CHANGES
-  }
-}
-
-//
-// TODO(ntestu) change to SetProjectFileName
-export interface SetProjectFilePath {
-  type: ActionTypes.SET_PROJECT_FILE_PATH
-  projectFilePath: string
-}
-
-export function setProjectFilePath(projectFilePath: string): SetProjectFilePath {
-  return {
-    type: ActionTypes.SET_PROJECT_FILE_PATH,
-    projectFilePath: projectFilePath
   }
 }
 
@@ -587,7 +572,6 @@ export function setSidePanelVisibility(panelsAreVisible: boolean): SetSidePanelV
 export type AppAction =
   LoadState |
   LoadDefaultState |
-  SetProjectFilePath |
   SetProjectHasUnsavedChanged |
   SetCalibrationMode |
   SetImageOpacity |

@@ -18,6 +18,6 @@
 
 export interface UIState {
   sidePanelsAreVisible: boolean
-  projectFilePath: string | null
+  projectName: string | null
   projectHasUnsavedChanges: boolean
 }

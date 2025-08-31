@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, SaveProjectAsMessage, NewProjectMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from './ipc-messages'
+import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, NewProjectMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from './ipc-messages'
 
-import { SpecifyProjectPathMessage, SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
+import { SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
 import AppMenuManager from './app-menu-manager'
 import ProjectFile from '../gui/io/project-file'
 // TODO(ntestu)
@@ -179,21 +179,6 @@ function createWindow() {
     window.setMenuBarVisibility(true)
   })
 
-  ipcMain.on(SpecifyProjectPathMessage.type, (_: any, __: SpecifyProjectPathMessage) => {
-    dialog.showSaveDialog(
-      {}
-    ).then((result) => {
-      if (!result.canceled && result.filePath) {
-        window.webContents.send(
-          SaveProjectAsMessage.type,
-          new SaveProjectAsMessage(result.filePath)
-        )
-      }
-    }).catch((error: unknown) => {
-      console.error('Failed to save project:', error)
-    })
-  })
-
   ipcMain.on(SpecifyExportPathMessage.type, (_: any, message: SpecifyExportPathMessage) => {
     dialog.showSaveDialog(
       {}
@@ -246,8 +231,8 @@ function createWindow() {
 
   ipcMain.on(SetDocumentStateMessage.type, (_: any, message: SetDocumentStateMessage) => {
     if (documentState !== null) {
-      if (message.filePath !== undefined) {
-        documentState.filePath = message.filePath
+      if (message.projectName !== undefined) {
+        documentState.filePath = message.projectName
       }
       if (message.hasUnsavedChanges !== undefined) {
         documentState.hasUnsavedChanges = message.hasUnsavedChanges

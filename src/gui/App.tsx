@@ -30,9 +30,9 @@ import { ImageState } from './types/image-state'
 import { SolverResult } from './solver/solver-result'
 import { ipcRenderer } from '../main/electron-polyfill/ipc'
 import { remote } from '../main/electron-polyfill/remote'
-import { NewProjectMessage, OpenProjectMessage, SaveProjectMessage, SaveProjectAsMessage, OpenImageMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from '../main/ipc-messages'
+import { NewProjectMessage, OpenProjectMessage, SaveProjectMessage, OpenImageMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from '../main/ipc-messages'
 import ProjectFile from './io/project-file'
-import { SpecifyProjectPathMessage, OpenDroppedProjectMessage, SpecifyExportPathMessage } from './ipc-messages'
+import { OpenDroppedProjectMessage, SpecifyExportPathMessage } from './ipc-messages'
 import { loadImage } from './io/util'
 import store from './store/store'
 import SplashScreen from './components/splash-screen'
@@ -40,22 +40,27 @@ import { Dispatch } from 'redux'
 import MenuBar from './components/menu/menu-bar'
 import { Buffer } from 'buffer'
 
-interface AppProps {
+interface AppStateProps {
   uiState: UIState,
   globalSettings: GlobalSettings,
   solverResult: SolverResult,
   image: ImageState,
+}
+
+interface AppDispatchProps {
   onImageFileDropped(imageBuffer: Buffer): void
   onProjectFileDropped(filePath: string, buffer: Buffer): void
   onOpenExampleProjectPressed(): void
 
   onNewProjectIPCMessage(): void
   onOpenProjectIPCMessage(filePath: string, buffer: Buffer, isExampleProject: boolean): void
-  onSaveProjectAsIPCMessage(filePath: string): void
+  onSaveProjectAsIPCMessage(projectName: string | null): void
   onOpenImageIPCMessage(imageBuffer: Buffer): void
   onExportIPCMessage(exportType: ExportType): void
   onSetSidePanelVisibilityIPCMessage(panelsAreVisible: boolean): void
 }
+
+type AppProps = AppStateProps & AppDispatchProps
 
 class App extends React.PureComponent<AppProps> {
 
@@ -132,15 +137,7 @@ class App extends React.PureComponent<AppProps> {
     })
 
     ipcRenderer.on(SaveProjectMessage.type, (_: any, __: SaveProjectMessage) => {
-      if (this.props.uiState.projectFilePath) {
-        this.props.onSaveProjectAsIPCMessage(this.props.uiState.projectFilePath)
-      } else {
-        ipcRenderer.send(SpecifyProjectPathMessage.type, new SpecifyProjectPathMessage())
-      }
-    })
-
-    ipcRenderer.on(SaveProjectAsMessage.type, (_: any, message: SaveProjectAsMessage) => {
-      this.props.onSaveProjectAsIPCMessage(message.filePath)
+      this.props.onSaveProjectAsIPCMessage(this.props.uiState.projectName)
     })
 
     ipcRenderer.on(OpenImageMessage.type, (_: any, message: OpenImageMessage) => {
@@ -157,7 +154,7 @@ class App extends React.PureComponent<AppProps> {
   }
 }
 
-export function mapStateToProps(state: StoreState) {
+export function mapStateToProps(state: StoreState): AppStateProps {
   return {
     uiState: state.uiState,
     globalSettings: state.globalSettings,
@@ -166,7 +163,7 @@ export function mapStateToProps(state: StoreState) {
   }
 }
 
-export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
+export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchProps {
   return {
     onImageFileDropped: (imageBuffer: Buffer) => {
       loadImage(
@@ -197,8 +194,8 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
     onOpenProjectIPCMessage: (filePath: string, buffer: Buffer, isExampleProject: boolean) => {
       ProjectFile.load(filePath, buffer, dispatch, isExampleProject)
     },
-    onSaveProjectAsIPCMessage: (filePath: string) => {
-      ProjectFile.save(filePath, dispatch)
+    onSaveProjectAsIPCMessage: (projectName: string | null) => {
+      ProjectFile.save(projectName)
     },
     onOpenImageIPCMessage: (imageBuffer: Buffer) => {
       loadImage(
@@ -210,9 +207,6 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
           alert('Failed to load image')
         }
       )
-    },
-    onOpenExampleProjectIPCMessage: () => {
-      ProjectFile.loadExample(dispatch)
     },
     onExportIPCMessage: (exportType: ExportType) => {
       let dataToExport: any | null = null

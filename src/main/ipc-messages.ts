@@ -41,15 +41,6 @@ export class SaveProjectMessage {
   static readonly type = 'saveProject'
 }
 
-export class SaveProjectAsMessage {
-  static readonly type = 'saveProjectAs'
-  readonly filePath: string
-
-  constructor(filePath: string) {
-    this.filePath = filePath
-  }
-}
-
 export class OpenImageMessage {
   static readonly type = 'openImage'
   readonly buffer: Buffer
