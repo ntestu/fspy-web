@@ -96,7 +96,7 @@ function createWindow() {
           if (!result.canceled) {
             window.webContents.send(
               OpenImageMessage.type,
-              new OpenImageMessage(result.filePaths[0])
+              new OpenImageMessage(result.buffers[0])
             )
           }
         }).catch((error: unknown) => {

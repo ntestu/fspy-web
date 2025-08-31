@@ -23,19 +23,17 @@ import SettingsContainer from './containers/settings-container'
 
 import { StoreState } from './types/store-state'
 import { connect } from 'react-redux'
-// TODO(ntestu)
 import { AppAction, setImage, loadDefaultState, setSidePanelVisibility } from './actions'
 import { GlobalSettings } from './types/global-settings'
 import { UIState } from './types/ui-state'
 import { ImageState } from './types/image-state'
 import { SolverResult } from './solver/solver-result'
 import { ipcRenderer } from '../main/electron-polyfill/ipc'
-// import { remote } from '../main/electron-polyfill/remote'
+import { remote } from '../main/electron-polyfill/remote'
 import { NewProjectMessage, OpenProjectMessage, SaveProjectMessage, SaveProjectAsMessage, OpenImageMessage, ExportMessage, ExportType, SetSidePanelVisibilityMessage } from '../main/ipc-messages'
 import ProjectFile from './io/project-file'
-// import { readFileSync } from 'fs'
 import { SpecifyProjectPathMessage, OpenDroppedProjectMessage, SpecifyExportPathMessage } from './ipc-messages'
-// import { loadImage } from './io/util'
+import { loadImage } from './io/util'
 import store from './store/store'
 import SplashScreen from './components/splash-screen'
 import { Dispatch } from 'redux'
@@ -47,14 +45,14 @@ interface AppProps {
   globalSettings: GlobalSettings,
   solverResult: SolverResult,
   image: ImageState,
-  onImageFileDropped(imagePath: string): void
+  onImageFileDropped(imageBuffer: Buffer): void
   onProjectFileDropped(filePath: string, buffer: Buffer): void
   onOpenExampleProjectPressed(): void
 
   onNewProjectIPCMessage(): void
   onOpenProjectIPCMessage(filePath: string, buffer: Buffer, isExampleProject: boolean): void
   onSaveProjectAsIPCMessage(filePath: string): void
-  onOpenImageIPCMessage(imagePath: string): void
+  onOpenImageIPCMessage(imageBuffer: Buffer): void
   onExportIPCMessage(exportType: ExportType): void
   onSetSidePanelVisibilityIPCMessage(panelsAreVisible: boolean): void
 }
@@ -95,7 +93,7 @@ class App extends React.PureComponent<AppProps> {
               this.props.onProjectFileDropped(filePath, buffer)
             } else {
               // try to open the file as an image
-              this.props.onImageFileDropped(filePath)
+              this.props.onImageFileDropped(buffer)
             }
           }).catch((error: unknown) => console.error('Failed to load dropped file:', error))
         }
@@ -146,7 +144,7 @@ class App extends React.PureComponent<AppProps> {
     })
 
     ipcRenderer.on(OpenImageMessage.type, (_: any, message: OpenImageMessage) => {
-      this.props.onOpenImageIPCMessage(message.filePath)
+      this.props.onOpenImageIPCMessage(message.buffer)
     })
 
     ipcRenderer.on(ExportMessage.type, (_: any, message: ExportMessage) => {
@@ -170,22 +168,19 @@ export function mapStateToProps(state: StoreState) {
 
 export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
   return {
-    onImageFileDropped: (imagePath: string) => {
-      // TODO(ntestu)
-      // let imageBuffer = readFileSync(imagePath)
-      // // TODO: good to do async loading here?
-      // loadImage(
-      //   imageBuffer,
-      //   (width: number, height: number, url: string) => {
-      //     dispatch(setImage(url, imageBuffer, width, height))
-      //   },
-      //   () => {
-      //     remote.dialog.showErrorBox(
-      //       'Failed to load image data',
-      //       'Could not load the image data. Is this a valid image file?'
-      //     )
-      //   }
-      // )
+    onImageFileDropped: (imageBuffer: Buffer) => {
+      loadImage(
+        imageBuffer,
+        (width: number, height: number, url: string) => {
+          dispatch(setImage(url, imageBuffer, width, height))
+        },
+        () => {
+          remote.dialog.showErrorBox(
+            'Failed to load image data',
+            'Could not load the image data. Is this a valid image file?'
+          )
+        }
+      )
     },
     onProjectFileDropped: (projectPath: string, buffer: Buffer) => {
       ipcRenderer.send(
@@ -205,18 +200,16 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>) {
     onSaveProjectAsIPCMessage: (filePath: string) => {
       ProjectFile.save(filePath, dispatch)
     },
-    onOpenImageIPCMessage: (imagePath: string) => {
-      // TODO(ntestu)
-      // let imageBuffer = readFileSync(imagePath)
-      // loadImage(
-      //   imageBuffer,
-      //   (width: number, height: number, url: string) => {
-      //     dispatch(setImage(url, imageBuffer, width, height))
-      //   },
-      //   () => {
-      //     alert('Failed to load image')
-      //   }
-      // )
+    onOpenImageIPCMessage: (imageBuffer: Buffer) => {
+      loadImage(
+        imageBuffer,
+        (width: number, height: number, url: string) => {
+          dispatch(setImage(url, imageBuffer, width, height))
+        },
+        () => {
+          alert('Failed to load image')
+        }
+      )
     },
     onOpenExampleProjectIPCMessage: () => {
       ProjectFile.loadExample(dispatch)
