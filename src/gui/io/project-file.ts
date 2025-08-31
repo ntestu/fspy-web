@@ -34,6 +34,7 @@ export default class ProjectFile {
   static readonly PROJECT_FILE_EXTENSION = 'fspy'
   static readonly PROJECT_FILE_ID = 'fspy'
   static readonly PROJECT_FILE_VERSION = 1
+  static readonly DEFAULT_PROJECT_NAME = 'Untitled'
 
   static get exampleProjectPath() {
     return resourcePath(this.EXAMPLE_PROJECT_FILENAME)
@@ -55,7 +56,7 @@ export default class ProjectFile {
   }
 
   static save(projectName: string | null) {
-    let fileName = projectName ?? 'Untitled';
+    let fileName = projectName ?? this.DEFAULT_PROJECT_NAME
 
     if (!fileName.endsWith('.' + this.PROJECT_FILE_EXTENSION)) {
       fileName += '.' + this.PROJECT_FILE_EXTENSION

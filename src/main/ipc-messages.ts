@@ -43,9 +43,11 @@ export class SaveProjectMessage {
 
 export class OpenImageMessage {
   static readonly type = 'openImage'
+  readonly fileName: string
   readonly buffer: Buffer
 
-  constructor(buffer: Buffer) {
+  constructor(fileName: string, buffer: Buffer) {
+    this.fileName = fileName
     this.buffer = buffer
   }
 }

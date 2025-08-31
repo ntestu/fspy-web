@@ -194,14 +194,16 @@ export function setOverlay3DGuide(overlay3DGuide: Overlay3DGuide): SetOverlay3DG
 //
 export interface SetImage {
   type: ActionTypes.SET_IMAGE
+  fileName: string,
   url: string
   data: Buffer
   width: number
   height: number
 }
-export function setImage(url: string, data: Buffer, width: number, height: number): SetImage {
+export function setImage(fileName: string, url: string, data: Buffer, width: number, height: number): SetImage {
   return {
     type: ActionTypes.SET_IMAGE,
+    fileName: fileName,
     url: url,
     data: data,
     width: width,

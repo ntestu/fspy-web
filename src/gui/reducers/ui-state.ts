@@ -68,7 +68,22 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
         projectHasUnsavedChanges: false,
         projectName: action.isExampleProject ? null : action.projectName
       }
+    case ActionTypes.SET_IMAGE:
+      const projectName = nameWithoutExtension(action.fileName)
+      ipcRenderer.send(
+        SetDocumentStateMessage.type,
+        new SetDocumentStateMessage(undefined, projectName, undefined),
+      )
+      return {
+        ...state,
+        projectName: projectName,
+      }
   }
 
   return state
+}
+
+function nameWithoutExtension(fileName: string): string {
+  const end = fileName.indexOf('.')
+  return end < 0 ? fileName : fileName.slice(0, end)
 }

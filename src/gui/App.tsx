@@ -48,14 +48,14 @@ interface AppStateProps {
 }
 
 interface AppDispatchProps {
-  onImageFileDropped(imageBuffer: Buffer): void
+  onImageFileDropped(fileName: string, imageBuffer: Buffer): void
   onProjectFileDropped(filePath: string, buffer: Buffer): void
   onOpenExampleProjectPressed(): void
 
   onNewProjectIPCMessage(): void
   onOpenProjectIPCMessage(filePath: string, buffer: Buffer, isExampleProject: boolean): void
   onSaveProjectAsIPCMessage(projectName: string | null): void
-  onOpenImageIPCMessage(imageBuffer: Buffer): void
+  onOpenImageIPCMessage(fileName: string, imageBuffer: Buffer): void
   onExportIPCMessage(exportType: ExportType): void
   onSetSidePanelVisibilityIPCMessage(panelsAreVisible: boolean): void
 }
@@ -98,7 +98,7 @@ class App extends React.PureComponent<AppProps> {
               this.props.onProjectFileDropped(filePath, buffer)
             } else {
               // try to open the file as an image
-              this.props.onImageFileDropped(buffer)
+              this.props.onImageFileDropped(filePath, buffer)
             }
           }).catch((error: unknown) => console.error('Failed to load dropped file:', error))
         }
@@ -141,7 +141,7 @@ class App extends React.PureComponent<AppProps> {
     })
 
     ipcRenderer.on(OpenImageMessage.type, (_: any, message: OpenImageMessage) => {
-      this.props.onOpenImageIPCMessage(message.buffer)
+      this.props.onOpenImageIPCMessage(message.fileName, message.buffer)
     })
 
     ipcRenderer.on(ExportMessage.type, (_: any, message: ExportMessage) => {
@@ -165,11 +165,11 @@ export function mapStateToProps(state: StoreState): AppStateProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchProps {
   return {
-    onImageFileDropped: (imageBuffer: Buffer) => {
+    onImageFileDropped: (fileName: string, imageBuffer: Buffer) => {
       loadImage(
         imageBuffer,
         (width: number, height: number, url: string) => {
-          dispatch(setImage(url, imageBuffer, width, height))
+          dispatch(setImage(fileName, url, imageBuffer, width, height))
         },
         () => {
           remote.dialog.showErrorBox(
@@ -197,11 +197,11 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchPr
     onSaveProjectAsIPCMessage: (projectName: string | null) => {
       ProjectFile.save(projectName)
     },
-    onOpenImageIPCMessage: (imageBuffer: Buffer) => {
+    onOpenImageIPCMessage: (fileName: string, imageBuffer: Buffer) => {
       loadImage(
         imageBuffer,
         (width: number, height: number, url: string) => {
-          dispatch(setImage(url, imageBuffer, width, height))
+          dispatch(setImage(fileName, url, imageBuffer, width, height))
         },
         () => {
           alert('Failed to load image')

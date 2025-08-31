@@ -34,3 +34,9 @@ This comes at the cost of some parts of the code being less idiomatic, e.g. anyt
 ## Notes
 
 This fork was created using `pnpx degit reduxjs/redux-templates/packages/vite-template-redux`.
+
+## Known issues
+
+- Pressing shift in a certain why while moving a point may cause it to become stuck
+- Saving a project doesn't remove "(modified)" from the page title
+- Anything near a `TODO(ntestu)` label in the code is incomplete

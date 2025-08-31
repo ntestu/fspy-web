@@ -96,7 +96,7 @@ function createWindow() {
           if (!result.canceled) {
             window.webContents.send(
               OpenImageMessage.type,
-              new OpenImageMessage(result.buffers[0])
+              new OpenImageMessage(result.filePaths[0], result.buffers[0])
             )
           }
         }).catch((error: unknown) => {
@@ -217,7 +217,7 @@ function createWindow() {
       } else if (documentState.filePath !== null) {
         title = documentState.filePath
       } else {
-        title = 'Untitled'
+        title = ProjectFile.DEFAULT_PROJECT_NAME
       }
 
       if (documentState.hasUnsavedChanges) {
