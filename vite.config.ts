@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '', // Not using "/" to allow deployments on a subpath, e.g. on GitHub Pages
   build: {
     rollupOptions: {
       output: {

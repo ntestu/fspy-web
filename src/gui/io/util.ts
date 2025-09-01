@@ -20,11 +20,11 @@ import { Buffer } from 'buffer'
 import syncFetch from 'sync-fetch'
 
 export function loadImage(
-  imageBuffer: Buffer,
+  imageBuffer: Buffer<ArrayBuffer>,
   onLoad: (width: number, height: number, url: string) => void,
   onError: () => void
 ) {
-  let blob = new Blob([imageBuffer as any]) // TODO(ntestu): remove cast
+  let blob = new Blob([imageBuffer])
   let url = URL.createObjectURL(blob)
   let image = new Image()
   image.src = url
@@ -38,13 +38,12 @@ export function loadImage(
 
 export function resourceURL(fileName: string): string {
   // Leftover function from the original repo kept to minimize changes
-  return resourcePath(fileName)
+  return fileName
 }
 
 export function resourcePath(fileName: string): string {
   // Leftover function from the original repo kept to minimize changes
-  // From https://vite.dev/guide/assets.html#the-public-directory: "Note that you should always reference public assets using root absolute path - for example, public/icon.png should be referenced in source code as /icon.png."
-  return '/' + fileName
+  return fileName
 }
 
 export function fetchBytesSync(url: string): Buffer {

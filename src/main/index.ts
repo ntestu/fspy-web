@@ -207,11 +207,9 @@ function createWindow() {
   }
 
   function generateTitle() {
-    if (documentState === null) {
-      return 'fSpy'
-    } else {
-      let title: string
+    let title = ''
 
+    if (documentState) {
       if (documentState.isExampleProject) {
         title = 'Example project'
       } else if (documentState.filePath !== null) {
@@ -224,9 +222,11 @@ function createWindow() {
         title += ' (modified)'
       }
 
-      title += ' - fSpy'
-      return title
+      title += ' - '
     }
+
+    title += ' fSpy-web'
+    return title
   }
 
   ipcMain.on(SetDocumentStateMessage.type, (_: any, message: SetDocumentStateMessage) => {
