@@ -21,13 +21,11 @@ import { OpenProjectMessage, OpenImageMessage, SaveProjectMessage, NewProjectMes
 import { SpecifyExportPathMessage, SetDocumentStateMessage, OpenDroppedProjectMessage } from '../gui/ipc-messages'
 import AppMenuManager from './app-menu-manager'
 import ProjectFile from '../gui/io/project-file'
-// TODO(ntestu)
-// import { openSync, writeSync, closeSync } from 'fs'
 import { BrowserWindow } from './electron-polyfill/browser-window'
 import { dialog } from './electron-polyfill/dialog'
 import { ipcMain } from './electron-polyfill/ipc'
 import { Menu } from './electron-polyfill/menu'
-import { fetchBytesSync } from '../gui/io/util'
+import { fetchBytesSync, removeExtension } from '../gui/io/util'
 import type { Buffer } from 'buffer'
 
 export interface DocumentState {
@@ -48,7 +46,7 @@ function openProject(path: string, buffer: Buffer, window: BrowserWindow) {
 }
 
 function createWindow() {
-  let window = new BrowserWindow();
+  let window = new BrowserWindow()
 
   let appMenuManager = new AppMenuManager(
     {
@@ -67,7 +65,7 @@ function createWindow() {
           if (!didCancel) {
             dialog.showOpenDialog(
               {
-                accept: '.fspy',
+                accept: '.' + ProjectFile.PROJECT_FILE_EXTENSION,
                 properties: ['openFile']
               }
             ).then((result) => {
@@ -179,19 +177,27 @@ function createWindow() {
     window.setMenuBarVisibility(true)
   })
 
-  ipcMain.on(SpecifyExportPathMessage.type, (_: any, _message: SpecifyExportPathMessage) => {
-    dialog.showSaveDialog(
-      {}
-    ).then((result) => {
-      if (!result.canceled && result.filePath) {
-        // TODO(ntestu)
-        // let file = openSync(result.filePath, 'w')
-        // writeSync(file, message.data)
-        // closeSync(file)
-      }
-    }).catch((error: unknown) => {
-      console.error('Failed to export data:', error)
-    })
+  ipcMain.on(SpecifyExportPathMessage.type, (_: any, message: SpecifyExportPathMessage) => {
+    const filePath = documentState?.filePath
+    let fileName: string
+    let type: string
+
+    switch (message.exportType) {
+      case ExportType.CameraParametersJSON:
+        fileName = (filePath ? removeExtension(filePath, ProjectFile.PROJECT_FILE_EXTENSION) + '-' : '') + 'camera'
+        type = 'application/json'
+        break
+      case ExportType.ProjectImage:
+        fileName = filePath ?? 'image'
+        type = 'image'
+        break
+      default:
+        message.exportType satisfies never
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        throw new Error(`Invalid export type ${message.exportType}`)
+    }
+
+    dialog.showSaveDialog(message.data, fileName, type)
   })
 
   ipcMain.on(OpenDroppedProjectMessage.type, (_: any, message: OpenDroppedProjectMessage) => {

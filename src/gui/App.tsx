@@ -221,6 +221,8 @@ export function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchPr
         case ExportType.ProjectImage:
           dataToExport = storeState.image.data
           break
+        default:
+          exportType satisfies never
       }
 
       if (dataToExport) {

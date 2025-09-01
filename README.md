@@ -36,6 +36,7 @@ This fork was created using `pnpx degit reduxjs/redux-templates/packages/vite-te
 
 ## Known issues
 
+<!-- TODO(ntestu) -->
 - Pressing shift in a certain why while moving a point may cause it to become stuck
 - Saving a project doesn't remove "(modified)" from the page title
 - Anything near a `TODO(ntestu)` label in the code is incomplete

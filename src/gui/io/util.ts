@@ -50,3 +50,16 @@ export function fetchBytesSync(url: string): Buffer {
   // TODO(ntestu): use async fetch instead
   return Buffer.from(syncFetch(url).arrayBuffer())
 }
+
+export function removeExtension(fileName: string, extension: string): string {
+  if (fileName.endsWith('.' + extension)) {
+    return fileName.slice(0, -extension.length - 1)
+  } else {
+    return fileName
+  }
+}
+
+export function removeAllExtensions(fileName: string): string {
+  const end = fileName.indexOf('.')
+  return end < 0 ? fileName : fileName.slice(0, end)
+}

@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer'
+import { saveAs } from 'file-saver'
 
 type OpenDialogOptions = {
   /**
@@ -16,15 +17,6 @@ type OpenDialogReturnValue =
       canceled: false
       filePaths: string[]
       buffers: Buffer<ArrayBuffer>[]
-    }
-
-type SaveDialogReturnValue =
-  | {
-      canceled: true
-    }
-  | {
-      canceled: false
-      filePath: string
     }
 
 class Dialog {
@@ -63,9 +55,12 @@ class Dialog {
     })
   }
 
-  showSaveDialog(_options: object): Promise<SaveDialogReturnValue> {
-    // TODO(ntestu)
-    return Promise.resolve({ canceled: true })
+  showSaveDialog(
+    data: string | Buffer<ArrayBuffer>,
+    fileName: string,
+    type: string,
+  ): void {
+    saveAs(new Blob([data], { type }), fileName)
   }
 }
 

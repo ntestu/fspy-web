@@ -21,6 +21,7 @@ import { UIState } from '../types/ui-state'
 import { defaultUIState } from '../defaults/ui-state'
 import { ipcRenderer } from '../../main/electron-polyfill/ipc'
 import { SetDocumentStateMessage } from '../ipc-messages'
+import { removeAllExtensions } from '../io/util'
 
 export function uiState(state: UIState | undefined, action: AppAction): UIState {
   if (state === undefined) {
@@ -69,7 +70,7 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
         projectName: action.isExampleProject ? null : action.projectName
       }
     case ActionTypes.SET_IMAGE:
-      const projectName = nameWithoutExtension(action.fileName)
+      const projectName = removeAllExtensions(action.fileName)
       ipcRenderer.send(
         SetDocumentStateMessage.type,
         new SetDocumentStateMessage(undefined, projectName, undefined),
@@ -81,9 +82,4 @@ export function uiState(state: UIState | undefined, action: AppAction): UIState 
   }
 
   return state
-}
-
-function nameWithoutExtension(fileName: string): string {
-  const end = fileName.indexOf('.')
-  return end < 0 ? fileName : fileName.slice(0, end)
 }
