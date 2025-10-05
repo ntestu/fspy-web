@@ -130,6 +130,9 @@ export default class ControlPoint extends React.Component<ControlPointProps, Con
             })
             this.onDragPositionChanged()
           }}
+          // See https://github.com/konvajs/react-konva/issues/360#issuecomment-568770741 and https://github.com/konvajs/react-konva/?tab=readme-ov-file#strict-mode
+          // Dragging a draggable component makes it uncontrolled when not using strict mode
+          _useStrictMode
         />
         {this.renderVisualRepresentation()}
       </Group>

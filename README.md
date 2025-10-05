@@ -15,7 +15,7 @@ Interested in writing an importer for your favorite application? Then the [fSpy 
 
 ## Building and running
 
-The following instructions are for developers. If you just want to use the app, head to the [web application](https://ntestu.github.io/fspy-web/) or [download the latest executable for your platform](https://github.com/stuffmatic/fSpy/releases).
+The following instructions are for developers. If you just want to use the app, head to the [web application](https://ntestu.github.io/fspy-web/).
 
 fspy-web is written in [Typescript](https://www.typescriptlang.org) using [Vite](https://vite.dev), [React](https://reactjs.org) and [Redux](https://redux.js.org). [Visual Studio Code](https://code.visualstudio.com) is recommended for a pleasant editing experience.
 
@@ -37,6 +37,6 @@ This fork was created using `pnpx degit reduxjs/redux-templates/packages/vite-te
 ## Known issues
 
 <!-- TODO(ntestu) -->
-- Pressing shift in a certain why while moving a point may cause it to become stuck
 - Saving a project doesn't remove "(modified)" from the page title
-- Anything near a `TODO(ntestu)` label in the code is incomplete
+- Resizing the page or zooming in/out can break the page
+- Anything near a `TODO(ntestu)` comment in the code is incomplete
